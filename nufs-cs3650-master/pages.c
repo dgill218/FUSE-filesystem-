@@ -35,7 +35,7 @@ blocks_init(const char* path)
     pages_base = mmap(0, NUFS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, pages_fd, 0);
     assert(pages_base != MAP_FAILED);
 
-    void* pbm = get_pages_bitmap();
+    void* pbm = get_blocks_bitmap();
     bitmap_put(pbm, 0, 1);
 }
 
@@ -55,20 +55,20 @@ blocks_get_block(int pnum)
 void*
 get_blocks_bitmap()
 {
-    return pages_get_page(0);
+    return blocks_get_block(0);
 }
 
 void*
 get_inode_bitmap()
 {
-    uint8_t* page = pages_get_page(0);
+    uint8_t* page = blocks_get_block(0);
     return (void*)(page + 32);
 }
 
 int
 alloc_block()
 {
-    void* pbm = get_pages_bitmap();
+    void* pbm = get_blocks_bitmap();
 
     for (int ii = 1; ii < PAGE_COUNT; ++ii) {
         if (!bitmap_get(pbm, ii)) {
@@ -85,7 +85,7 @@ void
 free_block(int pnum)
 {
     printf("+ free_page(%d)\n", pnum);
-    void* pbm = get_pages_bitmap();
+    void* pbm = get_blocks_bitmap();
     bitmap_put(pbm, pnum, 0);
 }
 
