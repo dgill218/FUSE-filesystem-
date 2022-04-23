@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "pages.h"
+#include "blocks.h"
 #include "util.h"
 #include "bitmap.h"
 

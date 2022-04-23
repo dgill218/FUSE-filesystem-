@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "slist.h"
-#include "pages.h"
+#include "blocks.h"
 #include "directory.h"
 #include "inode.h"
 #include "bitmap.h"

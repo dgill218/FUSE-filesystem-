@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include "inode.h"
-#include "pages.h"
+#include "blocks.h"
 #include "bitmap.h"
 
 /* Definition of the inode structure:

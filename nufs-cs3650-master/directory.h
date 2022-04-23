@@ -6,7 +6,7 @@
 #define DIR_NAME 48
 
 #include "slist.h"
-#include "pages.h"
+#include "blocks.h"
 #include "inode.h"
 
 typedef struct dirent {

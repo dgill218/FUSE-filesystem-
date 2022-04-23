@@ -1,7 +1,7 @@
 // Implementation of directory.h
 
 #include "slist.h"
-#include "pages.h"
+#include "blocks.h"
 #include "inode.h"
 #include "directory.h"
 #include "bitmap.h"
