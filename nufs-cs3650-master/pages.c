@@ -24,7 +24,7 @@ static int   pages_fd   = -1;
 static void* pages_base =  0;
 
 void
-pages_init(const char* path)
+blocks_init(const char* path)
 {
     pages_fd = open(path, O_CREAT | O_RDWR, 0644);
     assert(pages_fd != -1);
@@ -40,20 +40,20 @@ pages_init(const char* path)
 }
 
 void
-pages_free()
+blocks_free()
 {
     int rv = munmap(pages_base, NUFS_SIZE);
     assert(rv == 0);
 }
 
 void*
-pages_get_page(int pnum)
+blocks_get_block(int pnum)
 {
     return pages_base + 4096 * pnum;
 }
 
 void*
-get_pages_bitmap()
+get_blocks_bitmap()
 {
     return pages_get_page(0);
 }
@@ -66,7 +66,7 @@ get_inode_bitmap()
 }
 
 int
-alloc_page()
+alloc_block()
 {
     void* pbm = get_pages_bitmap();
 
@@ -82,7 +82,7 @@ alloc_page()
 }
 
 void
-free_page(int pnum)
+free_block(int pnum)
 {
     printf("+ free_page(%d)\n", pnum);
     void* pbm = get_pages_bitmap();

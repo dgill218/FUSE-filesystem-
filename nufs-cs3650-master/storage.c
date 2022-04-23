@@ -22,18 +22,18 @@ static void get_parent_child(const char* path, char* parent, char* child);
 void
 storage_init(const char* path) {
     // initialize the pages
-    pages_init(path);
+    blocks_init(path);
     // allocate a page for the inode list
-    if (!bitmap_get(get_pages_bitmap(), 1)) {
+    if (!bitmap_get(get_blocks_bitmap(), 1)) {
         for (int i = 0; i < 3; i++) {
-            int newpage = alloc_page();
+            int newpage = alloc_block();
             printf("second inode page allocated at page %d\n", newpage);
         }
     }
     // the remaining pages will be alloced when we put data in them
 
     // then we initialize the root directory if it isn't allocated
-    if (!bitmap_get(get_pages_bitmap(), 4)) {
+    if (!bitmap_get(get_blocks_bitmap(), 4)) {
         printf("initializing root directory");
         directory_init();
     }
@@ -95,7 +95,7 @@ storage_write(const char* path, const char* buf, size_t size, off_t offset)
     int nindex = offset;
     int rem = size;
     while (rem > 0) {
-        char* dest = pages_get_page(inode_get_pnum(write_node, nindex));
+        char* dest = blocks_get_block(inode_get_pnum(write_node, nindex));
         dest += nindex % 4096;
         int cpyamnt = min(rem, 4096 - (nindex % 4096));
         memcpy(dest, buf + bindex, cpyamnt);
@@ -115,7 +115,7 @@ storage_read(const char* path, char* buf, size_t size, off_t offset)
     int nindex = offset;
     int rem = size;
     while (rem > 0) {
-        char* src = pages_get_page(inode_get_pnum(node, nindex));
+        char* src = blocks_get_block(inode_get_pnum(node, nindex));
         src += nindex % 4096;
         int cpyamnt = min(rem, 4096 - (nindex % 4096));
         memcpy(buf + bindex, src, cpyamnt);

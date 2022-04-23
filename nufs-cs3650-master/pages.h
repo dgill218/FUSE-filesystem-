@@ -5,12 +5,12 @@
 
 #include <stdio.h>
 
-void pages_init(const char* path);
-void pages_free();
-void* pages_get_page(int pnum);
-void* get_pages_bitmap();
+void blocks_init(const char* path);
+void blocks_free();
+void* blocks_get_block(int pnum);
+void* get_blocks_bitmap();
 void* get_inode_bitmap();
-int alloc_page();
-void free_page(int pnum);
+int alloc_block();
+void free_block(int pnum);
 
 #endif
