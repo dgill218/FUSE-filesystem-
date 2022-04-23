@@ -1,3 +1,4 @@
+/*
 #include <stdio.h>
 
 #include "bitmap.h"
@@ -27,4 +28,4 @@ int main(int argc, char **argv) {
     bitmap_print(bm, SIZE);
 
     return 0;
-}
+}*/

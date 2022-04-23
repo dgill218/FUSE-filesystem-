@@ -1,3 +1,4 @@
+/*
 #include <stdio.h>
 
 #include "bitmap.h"
@@ -33,4 +34,4 @@ int main(int argc, char **argv) {
     blocks_free();
 
     return 0;
-}
+}*/
