@@ -1,4 +1,4 @@
-// inode implementation
+// inode_t implementation
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,8 +9,8 @@
 #include "bitmap.h"
 
 void
-print_inode(inode* node) {
-    printf("inode located at %p:\n", node);
+print_inode(inode_t* node) {
+    printf("inode_t located at %p:\n", node);
     printf("Reference count: %d\n", node->refs);
     printf("Node Permission + Type: %d\n", node->mode);
     printf("Node size in bytes: %d\n", node->size);
@@ -18,9 +18,9 @@ print_inode(inode* node) {
     printf("Node indirect pointer: %d\n", node->iptr);
 }
 
-inode* 
+inode_t*
 get_inode(int inum) {
-    inode* inodes = get_inode_bitmap() + 32;
+    inode_t* inodes = get_inode_bitmap() + 32;
     return &inodes[inum];
 }
 
@@ -35,7 +35,7 @@ alloc_inode() {
             break;
         }
     }
-    inode* new_node = get_inode(nodenum);
+    inode_t* new_node = get_inode(nodenum);
     new_node->refs = 1;
     new_node->size = 0;
     new_node->mode = 0;
@@ -49,18 +49,18 @@ alloc_inode() {
     return nodenum;
 }
 
-// marks the inode as free in the bitmap and then clears the pointer locations
+// marks the inode_t as free in the bitmap and then clears the pointer locations
 void 
 free_inode(int inum) {
-    inode* node = get_inode(inum);
+    inode_t* node = get_inode(inum);
     void* bmp = get_inode_bitmap(); 
     shrink_inode(node, 0);
     free_block(node->ptrs[0]);
     bitmap_put(bmp, inum, 0);
 }
 
-// grows the inode, if size gets too big, it allocates a new page if possible
-int grow_inode(inode* node, int size) {
+// grows the inode_t, if size gets too big, it allocates a new page if possible
+int grow_inode(inode_t* node, int size) {
     for (int i = (node->size / 4096) + 1; i <= size / 4096; i ++) {
         if (i < nptrs) { //we can use direct ptrs
             node->ptrs[i] = alloc_block(); //alloc a page
@@ -76,8 +76,8 @@ int grow_inode(inode* node, int size) {
     return 0;
 }
 
-// shrinks an inode size and deallocates pages if we've freed them up
-int shrink_inode(inode* node, int size) {
+// shrinks an inode_t size and deallocates pages if we've freed them up
+int shrink_inode(inode_t* node, int size) {
     for (int i = (node->size / 4096); i > size / 4096; i --) {
         if (i < nptrs) { //we're in direct ptrs
             free_block(node->ptrs[i]); //free the page
@@ -97,8 +97,8 @@ int shrink_inode(inode* node, int size) {
     return 0;  
 }
 
-// gets the page number for the inode
-int inode_get_pnum(inode* node, int fpn) {
+// gets the page number for the inode_t
+int inode_get_pnum(inode_t* node, int fpn) {
     int blocknum = fpn / 4096;
     if (blocknum < nptrs) {
         return node->ptrs[blocknum];
@@ -110,7 +110,7 @@ int inode_get_pnum(inode* node, int fpn) {
 
 void decrease_refs(int inum)
 {
-    inode* node = get_inode(inum);
+    inode_t* node = get_inode(inum);
     node->refs = node->refs - 1;
     if (node->refs < 1) {
         free_inode(inum);

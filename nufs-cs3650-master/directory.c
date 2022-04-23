@@ -10,31 +10,31 @@
 #include <errno.h>
 
 /*
-typedef struct dirent {
+typedef struct dirent_t {
     char name[DIR_NAME_LENGTH]; // The name of the directory
-    int  inum; // the number of the inode in the inode table?
+    int  inum; // the number of the inode_t in the inode_t table?
     char used; // is this used?
     char _reserved[11]; // rounding things out
-} dirent; */
+} dirent_t; */
 
 
 void directory_init() {
     // we already have our page for the inodes allocated
-    // the root inode will be node 0
-    inode* rootnode = get_inode(alloc_inode());
+    // the root inode_t will be node 0
+    inode_t* rootnode = get_inode(alloc_inode());
     rootnode->mode = 040755;
 }
 
 int 
-directory_lookup(inode* dd, const char* name) {
+directory_lookup(inode_t* dd, const char* name) {
     printf("looking for \"%s\" in dirlookup\n", name);
     if (!strcmp(name, "")) {
         printf("this is root, returning 0\n");
         return 0; 
     }
-    dirent* subdirs = blocks_get_block(dd->ptrs[0]);
+    dirent_t* subdirs = blocks_get_block(dd->ptrs[0]);
     for (int ii = 0; ii < 64; ++ii) {
-        dirent csubdir = subdirs[ii];
+        dirent_t csubdir = subdirs[ii];
         if (strcmp(name, csubdir.name) == 0 && csubdir.used) {
             printf("found a match! returning %d\n", csubdir.inum);
             return csubdir.inum;
@@ -68,19 +68,19 @@ tree_lookup(const char* path) {
     return curnode;
 }
     
-// puts a new directory entry into the dir at dd that points to inode inum
-int directory_put(inode* dd, const char* name, int inum) {
-    int numentries = dd->size / sizeof(dirent);
-    dirent* entries = blocks_get_block(dd->ptrs[0]);
+// puts a new directory entry into the dir at dd that points to inode_t inum
+int directory_put(inode_t* dd, const char* name, int inum) {
+    int numentries = dd->size / sizeof(dirent_t);
+    dirent_t* entries = blocks_get_block(dd->ptrs[0]);
     int alloced = 0; // we want to keep track of whether we've alloced or not
 
     // building the new directory entry;
-    dirent new;
+    dirent_t new;
     strncpy(new.name, name, DIR_NAME_LENGTH);
     new.inum = inum;
     new.used = 1;
 
-    for (int ii = 1; ii < dd->size / sizeof(dirent); ++ii) {
+    for (int ii = 1; ii < dd->size / sizeof(dirent_t); ++ii) {
         if (entries[ii].used == 0) {
             entries[ii] = new;
             alloced = 1;
@@ -89,19 +89,19 @@ int directory_put(inode* dd, const char* name, int inum) {
     
     if (!alloced) {
         entries[numentries] = new;
-        dd->size = dd->size + sizeof(dirent);
+        dd->size = dd->size + sizeof(dirent_t);
     }
 
     printf("running dir_put, putting %s, inum %d, on page %d\n", name, inum, dd->ptrs[0]);
     return 0;
 }
 
-// this sets the matching directory to unused and takes a ref off its inode
-int directory_delete(inode* dd, const char* name) {
+// this sets the matching directory to unused and takes a ref off its inode_t
+int directory_delete(inode_t* dd, const char* name) {
     printf("running dir delete on filename %s\n", name);
-    dirent* entries = blocks_get_block(dd->ptrs[0]);
+    dirent_t* entries = blocks_get_block(dd->ptrs[0]);
     printf("got direntries at block %d\n", dd->ptrs[0]);
-    for (int ii = 0; ii < dd->size / sizeof(dirent); ++ii) {
+    for (int ii = 0; ii < dd->size / sizeof(dirent_t); ++ii) {
         if (strcmp(entries[ii].name, name) == 0) {
             printf("found a deletion match at entry %d\n", ii);
             entries[ii].used = 0;
@@ -116,9 +116,9 @@ int directory_delete(inode* dd, const char* name) {
 // list of directories where? at the path? wait... this is for ls
 slist_t* directory_list(const char* path) {
     int working_dir = tree_lookup(path);
-    inode* w_inode = get_inode(working_dir);
-    int numdirs = w_inode->size / sizeof(dirent);
-    dirent* dirs = blocks_get_block(w_inode->ptrs[0]);
+    inode_t* w_inode = get_inode(working_dir);
+    int numdirs = w_inode->size / sizeof(dirent_t);
+    dirent_t* dirs = blocks_get_block(w_inode->ptrs[0]);
     slist_t* dirnames = NULL;
     for (int ii = 0; ii < numdirs; ++ii) {
         if (dirs[ii].used) {
@@ -129,9 +129,9 @@ slist_t* directory_list(const char* path) {
 }
 
 
-void print_directory(inode* dd) {
-    int numdirs = dd->size / sizeof(dirent);
-    dirent* dirs = blocks_get_block(dd->ptrs[0]);
+void print_directory(inode_t* dd) {
+    int numdirs = dd->size / sizeof(dirent_t);
+    dirent_t* dirs = blocks_get_block(dd->ptrs[0]);
     for (int ii = 0; ii < numdirs; ++ii) {
         printf("%s\n", dirs[ii].name);
     }

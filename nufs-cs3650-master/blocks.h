@@ -22,7 +22,7 @@ void blocks_free();
 void* blocks_get_block(int pnum);
 // Return a pointer to the beginning of the block bitmap.
 void* get_blocks_bitmap();
-// Return a pointer to the beginning of the inode table bitmap.
+// Return a pointer to the beginning of the inode_t table bitmap.
 void* get_inode_bitmap();
 // Allocate a new block and return its index.
 int alloc_block();

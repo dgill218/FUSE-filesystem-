@@ -11,18 +11,18 @@
 
 typedef struct dirent {
     char name[DIR_NAME_LENGTH];// The name of the directory
-    int  inum; // the number of the inode in the inode table?
+    int  inum; // the number of the inode_t in the inode_t table?
     char used; // is this directory entry being used?
-} dirent;
+} dirent_t;
 
 // not sure what this does
 void directory_init(); 
-int directory_lookup(inode* dd, const char* name);
+int directory_lookup(inode_t* dd, const char* name);
 int tree_lookup(const char* path);
-int directory_put(inode* dd, const char* name, int inum);
-int directory_delete(inode* dd, const char* name);
+int directory_put(inode_t* dd, const char* name, int inum);
+int directory_delete(inode_t* dd, const char* name);
 slist_t* directory_list(const char* path);
-void print_directory(inode* dd);
+void print_directory(inode_t* dd);
 
 #endif
 

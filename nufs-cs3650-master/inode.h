@@ -17,15 +17,15 @@ typedef struct inode {
     time_t atim; // time last accessed
     time_t ctim; // time created
     time_t mtim; // time last modified
-} inode;
+} inode_t;
 
-void print_inode(inode* node);
-inode* get_inode(int inum);
+void print_inode(inode_t* node);
+inode_t* get_inode(int inum);
 int alloc_inode();
 void free_inode(int inum);
-int grow_inode(inode* node, int size);
-int shrink_inode(inode* node, int size);
-int inode_get_pnum(inode* node, int fpn);
+int grow_inode(inode_t* node, int size);
+int shrink_inode(inode_t* node, int size);
+int inode_get_pnum(inode_t* node, int fpn);
 void decrease_refs(int inum);
 
 #endif

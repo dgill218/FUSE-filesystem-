@@ -15,7 +15,7 @@
 #include "util.h"
 
 // declaring helpers
-static void storage_update_time(inode* dd, time_t newa, time_t newm);
+static void storage_update_time(inode_t* dd, time_t newa, time_t newm);
 static void get_parent_child(const char* path, char* parent, char* child);
 
 // initializes our file structure
@@ -23,11 +23,11 @@ void
 storage_init(const char* path) {
     // initialize the pages
     blocks_init(path);
-    // allocate a page for the inode list
+    // allocate a page for the inode_t list
     if (!bitmap_get(get_blocks_bitmap(), 1)) {
         for (int i = 0; i < 3; i++) {
             int newpage = alloc_block();
-            printf("second inode page allocated at page %d\n", newpage);
+            printf("second inode_t page allocated at page %d\n", newpage);
         }
     }
     // the remaining pages will be alloced when we put data in them
@@ -45,7 +45,7 @@ storage_access(const char* path) {
 
     int rv = tree_lookup(path);
     if (rv >= 0) {
-        inode* node = get_inode(rv);
+        inode_t* node = get_inode(rv);
         time_t curtime = time(NULL);
         node->atim = curtime;
         return 0;
@@ -54,12 +54,12 @@ storage_access(const char* path) {
         return -ENOENT;
 }
 
-// mutates the stat with the inode features at the path
+// mutates the stat with the inode_t features at the path
 int 
 storage_stat(const char* path, struct stat* st) {
     int working_inum = tree_lookup(path);
     if (working_inum > 0) {
-        inode* node = get_inode(working_inum);
+        inode_t* node = get_inode(working_inum);
         st->st_mode = node->mode;
         st->st_size = node->size;
         st->st_atime = node->atim;
@@ -74,7 +74,7 @@ storage_stat(const char* path, struct stat* st) {
 int 
 storage_truncate(const char *path, off_t size) {
     int inum = tree_lookup(path);
-    inode* node = get_inode(inum);
+    inode_t* node = get_inode(inum);
     if (node->size < size) {
 	grow_inode(node, size);
     } else {
@@ -87,7 +87,7 @@ int
 storage_write(const char* path, const char* buf, size_t size, off_t offset)
 {
     // get the start point with the path
-    inode* write_node = get_inode(tree_lookup(path));
+    inode_t* write_node = get_inode(tree_lookup(path));
     if (write_node->size < size + offset) {
         storage_truncate(path, size + offset);
     }
@@ -110,7 +110,7 @@ int
 storage_read(const char* path, char* buf, size_t size, off_t offset)
 {
     printf("storage_read called, buffer is\n%s\n", buf);
-    inode* node = get_inode(tree_lookup(path));
+    inode_t* node = get_inode(tree_lookup(path));
     int bindex = 0;
     int nindex = offset;
     int rem = size;
@@ -148,11 +148,11 @@ storage_mknod(const char* path, int mode) {
     }
     
     int new_inode = alloc_inode();
-    inode* node = get_inode(new_inode);
+    inode_t* node = get_inode(new_inode);
     node->mode = mode;
     node->size = 0;
     node->refs = 1;
-    inode* parent_dir = get_inode(pnodenum);
+    inode_t* parent_dir = get_inode(pnodenum);
 
     directory_put(parent_dir, item, new_inode);
     free(item);
@@ -161,14 +161,14 @@ storage_mknod(const char* path, int mode) {
 }
 
 // this is used for the removal of a link. If refs are 0, then we also
-// delete the inode associated with the dirent
+// delete the inode_t associated with the dirent_t
 int
 storage_unlink(const char* path) {
     char* nodename = malloc(50);
     char* parentpath = malloc(strlen(path));
     get_parent_child(path, parentpath, nodename);
 
-    inode* parent = get_inode(tree_lookup(parentpath));
+    inode_t* parent = get_inode(tree_lookup(parentpath));
     int rv = directory_delete(parent, nodename);
 
     free(parentpath);
@@ -188,7 +188,7 @@ storage_link(const char *from, const char *to) {
     char* fparent = malloc(strlen(from));
     get_parent_child(from, fparent, fname);
 
-    inode* pnode = get_inode(tree_lookup(fparent));
+    inode_t* pnode = get_inode(tree_lookup(fparent));
     directory_put(pnode, fname, tnum);
     get_inode(tnum)->refs ++;
     
@@ -226,13 +226,13 @@ storage_set_time(const char* path, const struct timespec ts[2])
     if (nodenum < 0) {
         return -ENOENT;
     }
-    inode* node = get_inode(nodenum);
+    inode_t* node = get_inode(nodenum);
     storage_update_time(node, ts[0].tv_sec, ts[1].tv_sec);
     return 0;
 }
 
 static
-void storage_update_time(inode* dd, time_t newa, time_t newm)
+void storage_update_time(inode_t* dd, time_t newa, time_t newm)
 {
     dd->atim = newa;
     dd->mtim = newm;
