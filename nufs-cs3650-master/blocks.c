@@ -17,9 +17,12 @@
 #include "util.h"
 #include "bitmap.h"
 
-const int BLOCK_COUNT = 256;
-const int BLOCK_SIZE = 4096;
-const int NUFS_SIZE  = BLOCK_SIZE * 256; // 1MB
+const int BLOCK_COUNT = 256; // we split the "disk" into 256 blocks
+const int BLOCK_SIZE = 4096; // = 4K
+const int NUFS_SIZE  = BLOCK_SIZE * 256; // = 1MB
+
+const int BLOCK_BITMAP_SIZE = BLOCK_COUNT / 8;
+// Note: assumes block count is divisible by 8
 
 static int   pages_fd   = -1;
 static void* pages_base =  0;
