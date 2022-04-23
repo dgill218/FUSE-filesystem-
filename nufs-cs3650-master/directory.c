@@ -11,7 +11,7 @@
 
 /*
 typedef struct dirent {
-    char name[DIR_NAME]; // The name of the directory
+    char name[DIR_NAME_LENGTH]; // The name of the directory
     int  inum; // the number of the inode in the inode table?
     char used; // is this used?
     char _reserved[11]; // rounding things out
@@ -76,7 +76,7 @@ int directory_put(inode* dd, const char* name, int inum) {
 
     // building the new directory entry;
     dirent new;
-    strncpy(new.name, name, DIR_NAME); 
+    strncpy(new.name, name, DIR_NAME_LENGTH);
     new.inum = inum;
     new.used = 1;
 

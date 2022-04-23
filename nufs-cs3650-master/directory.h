@@ -3,17 +3,17 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 
-#define DIR_NAME 48
+#define DIR_NAME_LENGTH 48
 
 #include "slist.h"
 #include "blocks.h"
 #include "inode.h"
 
 typedef struct dirent {
-    char name[DIR_NAME];// The name of the directory
+    char name[DIR_NAME_LENGTH];// The name of the directory
     int  inum; // the number of the inode in the inode table?
     char used; // is this directory entry being used?
-    char _reserved[11]; // round it out to 64B
+    char _reserved[12]; // round it out to 64B
 } dirent;
 
 // not sure what this does
