@@ -51,9 +51,9 @@ tree_lookup(const char* path) {
     int jj = 0;
     int curnode = 0;
     
-    // creates an slist with all the dir names and the file name
-    slist* pathlist = s_explode(path, '/');
-    slist* currdir = pathlist;
+    // creates an slist_t with all the dir names and the file name
+    slist_t* pathlist = s_explode(path, '/');
+    slist_t* currdir = pathlist;
     while (currdir != NULL) {
         // we look for the name of the next dir in the current one
         curnode = directory_lookup(get_inode(curnode), currdir->data);
@@ -114,12 +114,12 @@ int directory_delete(inode* dd, const char* name) {
 }
 
 // list of directories where? at the path? wait... this is for ls
-slist* directory_list(const char* path) {
+slist_t* directory_list(const char* path) {
     int working_dir = tree_lookup(path);
     inode* w_inode = get_inode(working_dir);
     int numdirs = w_inode->size / sizeof(dirent);
     dirent* dirs = blocks_get_block(w_inode->ptrs[0]);
-    slist* dirnames = NULL; 
+    slist_t* dirnames = NULL;
     for (int ii = 0; ii < numdirs; ++ii) {
         if (dirs[ii].used) {
             dirnames = s_cons(dirs[ii].name, dirnames);

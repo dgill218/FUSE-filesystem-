@@ -6,10 +6,10 @@
 
 #include "slist.h"
 
-slist*
-s_cons(const char* text, slist* rest)
+slist_t*
+s_cons(const char* text, slist_t* rest)
 {
-    slist* xs = malloc(sizeof(slist));
+    slist_t* xs = malloc(sizeof(slist_t));
     xs->data = strdup(text);
     xs->refs = 1;
     xs->next = rest;
@@ -17,7 +17,7 @@ s_cons(const char* text, slist* rest)
 }
 
 void
-s_free(slist* xs)
+s_free(slist_t* xs)
 {
     if (xs == 0) {
         return;
@@ -32,7 +32,7 @@ s_free(slist* xs)
     }
 }
 
-slist*
+slist_t*
 s_explode(const char* text, char delim)
 {
     if (*text == 0) {
@@ -49,7 +49,7 @@ s_explode(const char* text, char delim)
         skip = 1;
     }
 
-    slist* rest = s_explode(text + plen + skip, delim);
+    slist_t* rest = s_explode(text + plen + skip, delim);
     char*  part = alloca(plen + 2);
     memcpy(part, text, plen);
     part[plen] = 0;

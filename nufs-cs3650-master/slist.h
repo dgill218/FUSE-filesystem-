@@ -6,12 +6,12 @@
 typedef struct slist {
     char* data;
     int   refs;
-    struct slist* next;
-} slist;
+    struct slist_t* next;
+} slist_t;
 
-slist* s_cons(const char* text, slist* rest);
-void   s_free(slist* xs);
-slist* s_explode(const char* text, char delim);
+slist_t* s_cons(const char* text, slist_t* rest);
+void   s_free(slist_t* xs);
+slist_t* s_explode(const char* text, char delim);
 
 
 #endif
