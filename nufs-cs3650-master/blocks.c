@@ -17,8 +17,9 @@
 #include "util.h"
 #include "bitmap.h"
 
-const int PAGE_COUNT = 256;
-const int NUFS_SIZE  = 4096 * 256; // 1MB
+const int BLOCK_COUNT = 256;
+const int BLOCK_SIZE = 4096;
+const int NUFS_SIZE  = BLOCK_SIZE * 256; // 1MB
 
 static int   pages_fd   = -1;
 static void* pages_base =  0;
@@ -70,7 +71,7 @@ alloc_block()
 {
     void* pbm = get_blocks_bitmap();
 
-    for (int ii = 1; ii < PAGE_COUNT; ++ii) {
+    for (int ii = 1; ii < BLOCK_COUNT; ++ii) {
         if (!bitmap_get(pbm, ii)) {
             bitmap_put(pbm, ii, 1);
             printf("+ alloc_page() -> %d\n", ii);
