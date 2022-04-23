@@ -33,7 +33,7 @@ s_free(slist* xs)
 }
 
 slist*
-s_split(const char* text, char delim)
+s_explode(const char* text, char delim)
 {
     if (*text == 0) {
         return 0;
@@ -49,7 +49,7 @@ s_split(const char* text, char delim)
         skip = 1;
     }
 
-    slist* rest = s_split(text + plen + skip, delim);
+    slist* rest = s_explode(text + plen + skip, delim);
     char*  part = alloca(plen + 2);
     memcpy(part, text, plen);
     part[plen] = 0;

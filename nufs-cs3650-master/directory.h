@@ -13,7 +13,6 @@ typedef struct dirent {
     char name[DIR_NAME_LENGTH];// The name of the directory
     int  inum; // the number of the inode in the inode table?
     char used; // is this directory entry being used?
-  //  char _reserved[12];
 } dirent;
 
 // not sure what this does

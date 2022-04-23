@@ -52,7 +52,7 @@ tree_lookup(const char* path) {
     int curnode = 0;
     
     // creates an slist with all the dir names and the file name
-    slist* pathlist = s_split(path, '/');
+    slist* pathlist = s_explode(path, '/');
     slist* currdir = pathlist;
     while (currdir != NULL) {
         // we look for the name of the next dir in the current one

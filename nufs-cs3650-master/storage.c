@@ -243,7 +243,7 @@ slist* storage_list(const char* path) {
 }
 
 static void get_parent_child(const char* path, char* parent, char* child) {
-    slist* flist = s_split(path, '/');
+    slist* flist = s_explode(path, '/');
     slist* fdir = flist;
     parent[0] = 0;
     while (fdir->next != NULL) {

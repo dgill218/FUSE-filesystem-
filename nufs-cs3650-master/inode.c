@@ -8,20 +8,7 @@
 #include "blocks.h"
 #include "bitmap.h"
 
-/* Definition of the inode structure:
-
-typedef struct inode {
-    int refs; // reference count
-    int mode; // permission & type
-    int size; // bytes
-    int ptrs[2]; // direct pointers
-    int iptr; // single indirect pointer
-    time_t atim;
-    time_t ctim;
-    time_t mtim;
-} inode; */
-
-void 
+void
 print_inode(inode* node) {
     printf("inode located at %p:\n", node);
     printf("Reference count: %d\n", node->refs);
@@ -41,10 +28,10 @@ get_inode(int inum) {
 int 
 alloc_inode() {
     int nodenum;
-    for (int ii = 0; ii < 256; ++ii) {
-        if (!bitmap_get(get_inode_bitmap(), ii)) {
-            bitmap_put(get_inode_bitmap(), ii, 1);
-            nodenum = ii;
+    for (int i = 0; i < 256; ++i) {
+        if (!bitmap_get(get_inode_bitmap(), i)) {
+            bitmap_put(get_inode_bitmap(), i, 1);
+            nodenum = i;
             break;
         }
     }
@@ -65,7 +52,6 @@ alloc_inode() {
 // marks the inode as free in the bitmap and then clears the pointer locations
 void 
 free_inode(int inum) {
-    printf("+ free_inode(%d)\n", inum);
     inode* node = get_inode(inum);
     void* bmp = get_inode_bitmap(); 
     shrink_inode(node, 0);
