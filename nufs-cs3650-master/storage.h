@@ -1,12 +1,16 @@
+// Disk storage manipulation.
+//
+// Feel free to use as inspiration.
+
 // based on cs3650 starter code
 
 #ifndef NUFS_STORAGE_H
 #define NUFS_STORAGE_H
 
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "slist.h"
 

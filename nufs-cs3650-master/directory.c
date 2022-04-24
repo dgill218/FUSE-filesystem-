@@ -113,7 +113,7 @@ int directory_delete(inode_t* dd, const char* name) {
     return -ENOENT;
 }
 
-// list of directories where? at the path? wait... this is for ls
+// List of directories at the given path
 slist_t* directory_list(const char* path) {
     int working_dir = tree_lookup(path);
     inode_t* w_inode = get_inode(working_dir);
