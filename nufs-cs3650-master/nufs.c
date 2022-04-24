@@ -32,8 +32,7 @@ nufs_getattr(const char *path, struct stat *st)
 {
     int rv = 0;
     if (strcmp(path, "/") == 0) {
-    // we DO want this root case because it is a special case
-        st->st_mode = 040755; // directory
+        st->st_mode = 040755;
         st->st_size = 0;
         st->st_uid = getuid();
         st->st_nlink = 1;
