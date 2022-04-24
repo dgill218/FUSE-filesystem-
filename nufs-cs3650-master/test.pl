@@ -2,7 +2,7 @@
 use 5.16.0;
 use warnings FATAL => 'all';
 
-use Test::Simple tests => 28;
+use Test::Simple tests => 31;
 use IO::Handle;
 
 sub mount {
@@ -46,53 +46,39 @@ system("rm -f data.nufs test.log");
 say "#           == Basic Tests ==";
 mount();
 
-my $part1 = 0;
-
-sub p1ok {
-    my ($cond, $msg) = @_;
-    if ($cond) {
-        ++$part1;
-    }
-    else {
-        ok(0, $msg);
-    }
-}
-
 my $msg0 = "hello, one";
 write_text("one.txt", $msg0);
 ok(-e "mnt/one.txt", "File1 exists.");
-p1ok(-f "mnt/one.txt", "File1 is regular file.");
+ok(-f "mnt/one.txt", "File1 is regular file.");
 my $msg1 = read_text("one.txt");
 say "# '$msg0' eq '$msg1'?";
-p1ok($msg0 eq $msg1, "read back data1");
+ok($msg0 eq $msg1, "Read back data1 correctly.");
 
 my $msg2 = "hello, two";
 write_text("two.txt", $msg2);
-p1ok(-e "mnt/two.txt", "File2 exists.");
-p1ok(-f "mnt/two.txt", "File2 is regular file.");
+ok(-e "mnt/two.txt", "File2 exists.");
+ok(-f "mnt/two.txt", "File2 is regular file.");
 my $msg3 = read_text("two.txt");
 say "# '$msg0' eq '$msg1'?";
-p1ok($msg2 eq $msg3, "Read back data2 correctly.");
+ok($msg2 eq $msg3, "Read back data2 correctly.");
 
 my $files = `ls mnt`;
-p1ok($files =~ /one\.txt/, "one.txt is in the directory");
-p1ok($files =~ /two\.txt/, "two.txt is in the directory");
+ok($files =~ /one\.txt/, "one.txt is in the directory");
+ok($files =~ /two\.txt/, "two.txt is in the directory");
 
 my $long0 = "=This string is fourty characters long.=" x 50;
 write_text("2k.txt", $long0);
 my $long1 = read_text("2k.txt");
-p1ok($long0 eq $long1, "Read back long correctly.");
+ok($long0 eq $long1, "Read back long correctly.");
 
 my $long2 = read_text_slice("2k.txt", 10, 50);
 my $right = "ng is four";
-p1ok($long2 eq $right, "Read with offset & length");
-
-say "# part1 = $part1";
-ok($part1 == 9, "No regressions on the easy stuff.");
+ok($long2 eq $right, "Read with offset & length");
 
 unmount();
 
-ok(!-e "mnt/one.txt", "one.txt doesn't exist after umount");
+(!-e "mnt/one.txt") or die "one.txt exists after umount; FS never mounted?";
+
 $files = `ls mnt`;
 ok($files !~ /one\.txt/, "one.txt is not in the directory");
 ok($files !~ /two\.txt/, "two.txt is not in the directory");
@@ -111,80 +97,78 @@ $msg3 = read_text("two.txt");
 say "# '$msg2' eq '$msg3'?";
 ok($msg2 eq $msg3, "Read back data2 correctly again.");
 
+say "# Testing unlink...";
+
 system("rm -f mnt/one.txt");
 $files = `ls mnt`;
 ok($files !~ /one\.txt/, "deleted one.txt");
 
-system("mv mnt/two.txt mnt/abc.txt");
-$files = `ls mnt`;
-ok($files !~ /two\.txt/, "moved two.txt");
-ok($files =~ /abc\.txt/, "have abc.txt");
-
-my $msg4 = read_text("abc.txt");
-say "# '$msg2' eq '$msg4'?";
-ok($msg2 eq $msg4, "Read back data after rename.");
-
-say "#           == Less Basic Tests ==";
-
-system("ln mnt/abc.txt mnt/def.txt");
-my $msg5 = read_text("def.txt");
-say "# '$msg2' eq '$msg5'?";
-ok($msg2 eq $msg5, "Read back data after link.");
-
-system("rm -f mnt/abc.txt");
-my $msg6 = read_text("def.txt");
-say "# '$msg2' eq '$msg6'?";
-ok($msg2 eq $msg6, "Read back data after other link deleted.");
-
-system("mkdir mnt/foo");
-ok(-d "mnt/foo", "Made a directory");
-
-system("cp mnt/def.txt mnt/foo/abc.txt");
-my $msg7 = read_text("foo/abc.txt");
-say "# '$msg2' eq '$msg7'?";
-ok($msg2 eq $msg7, "Read back data from copy in subdir.");
-
-my $huge0 = "=This string is fourty characters long.=" x 1000;
-write_text("40k.txt", $huge0);
-my $huge1 = read_text("40k.txt");
-ok($huge0 eq $huge1, "Read back 40k correctly.");
-
-my $huge2 = read_text_slice("40k.txt", 10, 8050);
-$right = "ng is four";
-ok($huge2 eq $right, "Read with offset & length");
-
-system("mkdir -p mnt/dir1/dir2/dir3/dir4/dir5");
-my $hi0 = "hello there";
-write_text("dir1/dir2/dir3/dir4/dir5/hello.txt", $hi0);
-my $hi1 = read_text("dir1/dir2/dir3/dir4/dir5/hello.txt");
-ok($hi0 eq $hi1, "nested directories");
-
-system("mkdir mnt/numbers");
-for my $ii (1..50) {
-    write_text("numbers/$ii.num", "$ii");
-}
-
-my $nn = `ls mnt/numbers | wc -l`;
-ok($nn == 50, "created 50 files");
-
-for my $ii (1..5) {
-    my $xx = $ii * 10;
-    my $yy = read_text("numbers/$xx.num");
-    ok($xx == $yy, "check value $xx");
-}
-
-for my $ii (1..4) {
-    my $xx = $ii * 7;
-    system("rm mnt/numbers/$xx.num");
-}
-
 unmount();
 
-ok(!-d "mnt/numbers", "numbers dir doesn't exist after umount");
+system("rm -f data.nufs test.log");
 
 mount();
 
-my $mm = `ls mnt/numbers | wc -l`;
-ok($mm == 46, "deleted 4 files");
+say "#           == Advanced Tests ==";
+
+say "# Nested directories";
+
+ok(mkdir("mnt/foo"), "Create a new directory");
+ok(mkdir("mnt/tmp"), "Create another directory");
+ok((-d "mnt/foo" and -d "mnt/foo"), "Directories exist");
+$files = `ls mnt`;
+ok(($files =~ /foo/ and $files =~ /tmp/), "Directories listed");
+
+ok((mkdir("mnt/foo/bar") and -d "mnt/foo/bar"), "Create a nested directory");
+ok((mkdir("mnt/foo/bar/baz") and -d "mnt/foo/bar/baz"), "Create a nested-nested directory");
+
+my $msg4 = "This is a file";
+write_text("tmp/file.txt", $msg4);
+ok(-f "mnt/tmp/file.txt", "Create a file in a directory");
+my $msg5 = read_text("tmp/file.txt");
+ok($msg4 eq $msg5, "Read data back correctly");
+system("mv mnt/tmp/file.txt mnt/foo");
+ok(-e "mnt/foo/file.txt", "Move a file to another directory");
+my $msg6 = read_text("foo/file.txt");
+ok($msg4 eq $msg6, "Read data back correctly");
 
 unmount();
+
+system("rm -f data.nufs test.log");
+
+mount();
+
+say "# Large files";
+
+say "# -> 2 blocks";
+
+my $chunks = 256 + 128;
+my $content = "1_2_3_4_5_6_7_8_" x $chunks; # $chunks * 16 bytes of data
+write_text("large.txt", $content);
+$files = `ls mnt`;
+my $listed = $files =~ /large\.txt/;
+my $exists = -f "mnt/large.txt";
+my $size = -s "mnt/large.txt";
+$size or $size = 0;
+say "# Actual size: $size";
+my $has_size = $size eq 16 * $chunks + 1;
+ok(($listed and $exists and $has_size), "Large file exists and has the correct size");
+my $back = read_text("large.txt");
+ok($content eq $back, "Read back data from large file correctly");
+
+say "# -> 4 blocks";
+$chunks = 3 * 256 + 128;
+$content = "1_2_3_4_5_6_7_8_" x $chunks; # $chunks * 16 bytes of data
+write_text("larger.txt", $content);
+$files = `ls mnt`;
+$listed = $files =~ /larger\.txt/;
+$exists = -f "mnt/larger.txt";
+$size = -s "mnt/larger.txt";
+$size or $size = 0;
+say "# Actual size: $size";
+$has_size = $size eq 16 * $chunks + 1;
+ok(($listed and $exists and $has_size), "Larger file exists and has the correct size");
+$back = read_text("larger.txt");
+ok($content eq $back, "Read back data from larger file correctly");
+
+unmount()
