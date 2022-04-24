@@ -1,7 +1,5 @@
 // implementation of storage.h
 
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <errno.h>
@@ -14,8 +12,6 @@
 #include "bitmap.h"
 #include "util.h"
 
-// declaring helpers
-//static void storage_update_time(inode_t* dd, time_t newa, time_t newm);
 static void get_parent_child(const char* path, char* parent, char* child);
 
 // initializes our file structure
@@ -219,19 +215,9 @@ storage_set_time(const char* path, const struct timespec ts[2])
     if (nodenum < 0) {
         return -ENOENT;
     }
-    inode_t* node = get_inode(nodenum);
- //   storage_update_time(node, ts[0].tv_sec, ts[1].tv_sec);
     return 0;
 }
 
-/*
-static
-void storage_update_time(inode_t* dd, time_t newa, time_t newm)
-{
-    dd->atim = newa;
-    dd->mtim = newm;
-}
-*/
 
 slist_t* storage_list(const char* path) {
     return directory_list(path);

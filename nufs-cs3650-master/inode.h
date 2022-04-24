@@ -14,9 +14,6 @@ typedef struct inode {
     int size; // bytes
     int dirPtrs[num_ptrs]; // direct pointers
     int iptr; // single indirect pointer
-    time_t atim; // time last accessed
-    time_t ctim; // time created
-    time_t mtim; // time last modified
 } inode_t;
 
 void print_inode(inode_t* node);
