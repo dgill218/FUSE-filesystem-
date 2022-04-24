@@ -45,9 +45,6 @@ storage_access(const char* path) {
 
     int rv = tree_lookup(path);
     if (rv >= 0) {
-        inode_t* node = get_inode(rv);
-        time_t curtime = time(NULL);
-        //node->atim = curtime;
         return 0;
     }
     else
