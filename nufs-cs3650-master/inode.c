@@ -41,10 +41,10 @@ alloc_inode() {
     new_node->mode = 0;
     new_node->dirPtrs[0] = alloc_block();
     
-    time_t curtime = time(NULL);
+    /*time_t curtime = time(NULL);
     new_node->ctim = curtime;
     new_node->atim = curtime;
-    new_node->mtim = curtime;
+    new_node->mtim = curtime;*/
 
     return nodenum;
 }
