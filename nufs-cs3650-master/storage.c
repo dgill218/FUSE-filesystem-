@@ -43,8 +43,7 @@ storage_init(const char* path) {
 int
 storage_access(const char* path) {
 
-    int rv = tree_lookup(path);
-    if (rv >= 0) {
+    if (tree_lookup(path) >= 0) {
         return 0;
     }
     else
