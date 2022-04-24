@@ -47,7 +47,7 @@ storage_access(const char* path) {
     if (rv >= 0) {
         inode_t* node = get_inode(rv);
         time_t curtime = time(NULL);
-        node->atim = curtime;
+        //node->atim = curtime;
         return 0;
     }
     else
@@ -62,9 +62,6 @@ storage_stat(const char* path, struct stat* st) {
         inode_t* node = get_inode(working_inum);
         st->st_mode = node->mode;
         st->st_size = node->size;
-       /* st->st_atime = node->atim;
-        st->st_mtime = node->mtim;
-        st->st_ctime = node->ctim;*/
         st->st_nlink = node->refs;
         return 0;
     }
