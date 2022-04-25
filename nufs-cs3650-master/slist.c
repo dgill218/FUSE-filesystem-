@@ -44,12 +44,12 @@ s_explode(const char* text, char delim)
         plen += 1;
     }
 
-    int skip = 0;
+    int skipFlag = 0;
     if (text[plen] == delim) {
-        skip = 1;
+        skipFlag = 1;
     }
 
-    slist_t* rest = s_explode(text + plen + skip, delim);
+    slist_t* rest = s_explode(text + plen + skipFlag, delim);
     char*  part = alloca(plen + 2);
     memcpy(part, text, plen);
     part[plen] = 0;
