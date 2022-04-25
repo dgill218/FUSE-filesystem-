@@ -52,15 +52,18 @@ free_inode(int inum) {
     bitmap_put(bmp, inum, 0);
 }
 
-// grows the inode_t, if size gets too big, it allocates a new page if possible
+// Increases the size of inode
+// If too large, allocates a new page
 int grow_inode(inode_t *node, int size) {
     for (int i = (node->size / 4096) + 1; i <= size / 4096; i++) {
-        if (i < num_ptrs) { //we can use direct dirPtrs
+        // Direct ptrs
+        if (i < num_ptrs) {
             node->dirPtrs[i] = alloc_block(); //alloc a page
-        } else { //need to use indirect
-            if (node->iptr == 0) { //get a page if we don't have one
-                node->iptr = alloc_block();
-            }
+        }
+        else if(node->iptr == 0) {
+            node->iptr = alloc_block();
+        }
+        else {
             int *iptrs = blocks_get_block(node->iptr); //retrieve memory loc.
             iptrs[i - num_ptrs] = alloc_block(); //add another page
         }
