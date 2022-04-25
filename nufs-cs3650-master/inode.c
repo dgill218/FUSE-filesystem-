@@ -69,19 +69,19 @@ int grow_inode(inode_t* node, int size) {
     return 0;
 }
 
-// shrinks an inode_t size and deallocates pages if we've freed them up
+// shrinks an inode_t by the given size
 int shrink_inode(inode_t* node, int size) {
     for (int i = (node->size / 4096); i > size / 4096; i --) {
-        if (i < num_ptrs) { //we're in direct dirPtrs
-            free_block(node->dirPtrs[i]); //free the page
+        if (i < num_ptrs) { // direct pointers
+            free_block(node->dirPtrs[i]); // free
             node->dirPtrs[i] = 0;
-        } else { //need to use indirect
-            int* iptrs = blocks_get_block(node->iptr); //retrieve memory loc.
-            free_block(iptrs[i - num_ptrs]); //free the single page
+        } else { // indirect pointers
+            int* iptrs = blocks_get_block(node->iptr);
+            free_block(iptrs[i - num_ptrs]); // free
             iptrs[i - num_ptrs] = 0;
 
-            if (i == num_ptrs) { //if that was the last thing on the page
-                free_block(node->iptr); //we don't need it anymore
+            if (i == num_ptrs) {
+                free_block(node->iptr);
                 node->iptr = 0;
             }
         }
@@ -90,24 +90,15 @@ int shrink_inode(inode_t* node, int size) {
     return 0;  
 }
 
-// gets the page number for the inode_t
+// gets the page number for the given inode
 int inode_get_pnum(inode_t* node, int fpn) {
-    int blocknum = fpn / 4096;
-    if (blocknum < num_ptrs) {
-        return node->dirPtrs[blocknum];
+    int blockNum = fpn / 4096;
+    if (blockNum < num_ptrs) {
+        return node->dirPtrs[blockNum];
     } else {
         int* iptrs = blocks_get_block(node->iptr);
-        return iptrs[blocknum - num_ptrs];
+        return iptrs[blockNum - num_ptrs];
     }
 }
 
-/*
-void decrease_refs(int inum)
-{
-    inode_t* node = get_inode(inum);
-    node->refs = node->refs - 1;
-    if (node->refs < 1) {
-        free_inode(inum);
-    }
-}
-*/
+

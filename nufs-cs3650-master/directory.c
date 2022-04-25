@@ -84,10 +84,9 @@ int directory_put(inode_t *dd, const char *name, int inum) {
 // this sets the matching directory to unused and takes a ref off its inode_t
 int directory_delete(inode_t *dd, const char *name) {
     dirent_t *entries = blocks_get_block(dd->dirPtrs[0]);
-    for (int ii = 0; ii < dd->size / sizeof(dirent_t); ++ii) {
-        if (strcmp(entries[ii].name, name) == 0) {
-            entries[ii].used = 0;
-           // decrease_refs(entries[ii].inum);
+    for (int i = 0; i < dd->size / sizeof(dirent_t); ++i) {
+        if (strcmp(entries[i].name, name) == 0) {
+            entries[i].used = 0;
             return 0;
         }
     }
