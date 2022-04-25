@@ -87,14 +87,14 @@ int directory_delete(inode_t *dd, const char *name) {
     for (int ii = 0; ii < dd->size / sizeof(dirent_t); ++ii) {
         if (strcmp(entries[ii].name, name) == 0) {
             entries[ii].used = 0;
-            decrease_refs(entries[ii].inum);
+           // decrease_refs(entries[ii].inum);
             return 0;
         }
     }
     return -ENOENT;
 }
 
-// Gets a slist of directories at the given path 
+// Gets a slist of directories at the given path
 slist_t *directory_list(const char *path) {
     int current_dir = tree_lookup(path);
     inode_t *current_inode = get_inode(current_dir);
