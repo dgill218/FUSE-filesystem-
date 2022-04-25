@@ -1,83 +1,89 @@
-// based on cs3650 starter code
 
 #define _GNU_SOURCE
 #include <string.h>
 
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <assert.h>
-#include <fcntl.h>
 #include <errno.h>
-#include <stdio.h>
+#include <fcntl.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "blocks.h"
-#include "util.h"
 #include "bitmap.h"
+#include "blocks.h"
 
 const int BLOCK_COUNT = 256; // we split the "disk" into 256 blocks
 const int BLOCK_SIZE = 4096; // = 4K
-const int NUFS_SIZE  = BLOCK_SIZE * 256; // = 1MB
+const int NUFS_SIZE = BLOCK_SIZE * BLOCK_COUNT; // = 1MB
 
 const int BLOCK_BITMAP_SIZE = BLOCK_COUNT / 8;
 // Note: assumes block count is divisible by 8
 
-static int   pages_fd   = -1;
-static void* pages_base =  0;
+static int blocks_fd = -1;
+static void *blocks_base = 0;
 
-void
-blocks_init(const char* path)
-{
-    pages_fd = open(path, O_CREAT | O_RDWR, 0644);
-    assert(pages_fd != -1);
+// Get the number of blocks needed to store the given number of bytes.
+int bytes_to_blocks(int bytes) {
+    int quo = bytes / BLOCK_SIZE;
+    int rem = bytes % BLOCK_SIZE;
+    if (rem == 0) {
+        return quo;
+    } else {
+        return quo + 1;
+    }
+}
 
-    int rv = ftruncate(pages_fd, NUFS_SIZE);
+// Load and initialize the given disk image.
+void blocks_init(const char *image_path) {
+    blocks_fd = open(image_path, O_CREAT | O_RDWR, 0644);
+    assert(blocks_fd != -1);
+
+    // make sure the disk image is exactly 1MB
+    int rv = ftruncate(blocks_fd, NUFS_SIZE);
     assert(rv == 0);
 
-    pages_base = mmap(0, NUFS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, pages_fd, 0);
-    assert(pages_base != MAP_FAILED);
+    // map the image to memory
+    blocks_base =
+            mmap(0, NUFS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, blocks_fd, 0);
+    assert(blocks_base != MAP_FAILED);
 
-    void* pbm = get_blocks_bitmap();
-    bitmap_put(pbm, 0, 1);
+    // block 0 stores the block bitmap and the inode bitmap
+    void *bbm = get_blocks_bitmap();
+    bitmap_put(bbm, 0, 1);
 }
 
-void
-blocks_free()
-{
-    int rv = munmap(pages_base, NUFS_SIZE);
+// Close the disk image.
+void blocks_free() {
+    int rv = munmap(blocks_base, NUFS_SIZE);
     assert(rv == 0);
 }
 
-void*
-blocks_get_block(int pnum)
-{
-    return pages_base + 4096 * pnum;
+// Get the given block, returning a pointer to its start.
+void *blocks_get_block(int bnum) { return blocks_base + BLOCK_SIZE * bnum; }
+
+// Return a pointer to the beginning of the block bitmap.
+// The size is BLOCK_BITMAP_SIZE bytes.
+void *get_blocks_bitmap() { return blocks_get_block(0); }
+
+// Return a pointer to the beginning of the inode table bitmap.
+void *get_inode_bitmap() {
+    uint8_t *block = blocks_get_block(0);
+
+    // The inode bitmap is stored immediately after the block bitmap
+    return (void *) (block + BLOCK_BITMAP_SIZE);
 }
 
-void*
-get_blocks_bitmap()
-{
-    return blocks_get_block(0);
-}
-
-void*
-get_inode_bitmap()
-{
-    uint8_t* page = blocks_get_block(0);
-    return (void*)(page + 32);
-}
-
-int
-alloc_block()
-{
-    void* pbm = get_blocks_bitmap();
+// Allocate a new block and return its index.
+int alloc_block() {
+    void *bbm = get_blocks_bitmap();
 
     for (int ii = 1; ii < BLOCK_COUNT; ++ii) {
-        if (!bitmap_get(pbm, ii)) {
-            bitmap_put(pbm, ii, 1);
-            printf("+ alloc_page() -> %d\n", ii);
+        if (!bitmap_get(bbm, ii)) {
+            bitmap_put(bbm, ii, 1);
+            printf("+ alloc_block() -> %d\n", ii);
             return ii;
         }
     }
@@ -85,11 +91,9 @@ alloc_block()
     return -1;
 }
 
-void
-free_block(int pnum)
-{
-    printf("+ free_page(%d)\n", pnum);
-    void* pbm = get_blocks_bitmap();
-    bitmap_put(pbm, pnum, 0);
+// Deallocate the block with the given index.
+void free_block(int bnum) {
+    printf("+ free_block(%d)\n", bnum);
+    void *bbm = get_blocks_bitmap();
+    bitmap_put(bbm, bnum, 0);
 }
-
