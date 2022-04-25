@@ -101,6 +101,7 @@ int inode_get_pnum(inode_t* node, int fpn) {
     }
 }
 
+/*
 void decrease_refs(int inum)
 {
     inode_t* node = get_inode(inum);
@@ -109,3 +110,4 @@ void decrease_refs(int inum)
         free_inode(inum);
     }
 }
+*/
