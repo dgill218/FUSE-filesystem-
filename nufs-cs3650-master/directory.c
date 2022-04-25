@@ -12,7 +12,7 @@
 // Initialized a directory, allocating an inode
 void directory_init() {
     inode_t *root = get_inode(alloc_inode());
-    rootnode->mode = 040755;
+    root->mode = 040755;
 }
 
 
