@@ -60,10 +60,10 @@ int grow_inode(inode_t *node, int size) {
         if (i < num_ptrs) {
             node->dirPtrs[i] = alloc_block(); //alloc a page
         }
-        else if(node->iptr == 0) {
-            node->iptr = alloc_block();
-        }
         else {
+            if (node->iptr == 0) { //get a page if we don't have one
+                node->iptr = alloc_block();
+            }
             int *iptrs = blocks_get_block(node->iptr); //retrieve memory loc.
             iptrs[i - num_ptrs] = alloc_block(); //add another page
         }
