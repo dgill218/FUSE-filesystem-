@@ -12,6 +12,9 @@
 #include "bitmap.h"
 #include "util.h"
 
+void read_write(int first_i, int second_i, int remainder, inode_t* node);
+
+
 // initializes our file structure
 void
 storage_init(const char* path) {
@@ -66,7 +69,20 @@ int storage_truncate(const char *path, off_t size) {
     return 0;
 }
 
-// Writes to
+void read_write(int first_i, int second_i, int remainder, inode_t* node) {
+    while (remainder > 0) {
+        char* dest = blocks_get_block(inode_get_pnum(node, second_i));
+        dest += second_i % 4096;
+        int copy_amount = min(remainder, 4096 - (second_i % 4096));
+
+        memcpy(dest, buf + first_i, copy_amount);
+        first_i += copy_amount;
+        second_i += copy_amount;
+        remainder -= copy_amount;
+    }
+}
+
+// Writes to the path from the buf
 int storage_write(const char* path, const char* buf, size_t size, off_t offset)
 {
 
@@ -78,8 +94,8 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
     int first_i = 0;
     int second_i = offset;
     int remainder = size;
-
-    while (remainder > 0) {
+    read_write(first_i, second_i, remainder, write_node);
+    /*while (remainder > 0) {
         char* dest = blocks_get_block(inode_get_pnum(write_node, second_i));
         dest += second_i % 4096;
         int copy_amount = min(remainder, 4096 - (second_i % 4096));
@@ -88,29 +104,34 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
         first_i += copy_amount;
         second_i += copy_amount;
         remainder -= copy_amount;
-    }
+    }*/
     return size;    
 }
 
-int
-storage_read(const char* path, char* buf, size_t size, off_t offset)
+
+
+// Reads from the path
+int storage_read(const char* path, char* buf, size_t size, off_t offset)
 {
     printf("storage_read called, buffer is\n%s\n", buf);
     inode_t* node = get_inode(tree_lookup(path));
-    int bindex = 0;
-    int nindex = offset;
-    int rem = size;
-    while (rem > 0) {
-        char* src = blocks_get_block(inode_get_pnum(node, nindex));
+    int first_i = 0;
+    int second_i = offset;
+    int remainder = size;
+    while (remainder > 0) {
+        char* src = blocks_get_block(inode_get_pnum(node, second_i));
         src += nindex % 4096;
-        int cpyamnt = min(rem, 4096 - (nindex % 4096));
-        memcpy(buf + bindex, src, cpyamnt);
-        bindex += cpyamnt;
-        nindex += cpyamnt;
-        rem -= cpyamnt;
+        int cpyamnt = min(remainder, 4096 - (second_i % 4096));
+
+        memcpy(buf + first_i, src, copy_amount);
+        first_i += copy_amount;
+        second_i += copy_amount;
+        remainder -= copy_amount;
     }
     return size;
 }
+
+
 
 int
 storage_mknod(const char* path, int mode) {
