@@ -12,7 +12,7 @@
 #include "bitmap.h"
 #include "util.h"
 
-void read_write(int first_i, int second_i, int remainder, inode_t* node);
+void read_write(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
 
 
 // initializes our file structure
