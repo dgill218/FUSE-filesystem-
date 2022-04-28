@@ -111,10 +111,12 @@ slist_t *directory_list(const char *path) {
 
 // Prints the directory name.
 void print_directory(inode_t *dd) {
-    int dirCount = dd->size / DIR_SIZE;
-    dirent_t *dirs = blocks_get_block(dd->direct_pointers[0]);
-    for (int i = 0; i < dirCount; ++i) {
-        printf("%s\n", dirs[i].name);
+    dirent_t *entries = blocks_get_block(dd->direct_pointers[0]);
+    for (int i = 0; i < dd->size / DIR_SIZE; ++i) {
+        if (strcmp(entries[i].name, name) == 0) {
+            printf("Directory name:%s", entries[i].name);
+            return 0;
+        }
     }
 }
 
