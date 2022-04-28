@@ -127,6 +127,7 @@ storage_mknod(const char* path, int mode) {
  
     char* item = malloc(50);
     char* parent = malloc(strlen(path));
+  //  get_parent_child(path, parent, item);
     slist_t* flist = s_explode(path, '/');
     slist_t* fdir = flist;
     parent[0] = 0;
@@ -135,10 +136,9 @@ storage_mknod(const char* path, int mode) {
         strncat(parent, fdir->data, 48);
         fdir = fdir->next;
     }
-    memcpy(child, fdir->data, strlen(fdir->data));
-    child[strlen(fdir->data)] = 0;
+    memcpy(item, fdir->data, strlen(fdir->data));
+    item[strlen(fdir->data)] = 0;
     s_free(flist);
- //   get_parent_child(path, parent, item);
 
     int    pnodenum = tree_lookup(parent);
     if (pnodenum < 0) {
