@@ -6,25 +6,20 @@
 #include "blocks.h"
 #include "bitmap.h"
 
-void
-print_inode(inode_t *node) {
+// prints some stats about the inode
+void print_inode(inode_t *node) {
     printf("inode_t located at %p:\n", node);
-    printf("Reference count: %d\n", node->refs);
-    printf("Node Permission + Type: %d\n", node->mode);
     printf("Node size: %d\n", node->size);
-    printf("Node direct pointers: %d, %d\n", node->direct_pointers[0], node->direct_pointers[1]);
-    printf("Node indirect pointer: %d\n", node->indirect_pointer);
 }
 
-inode_t *
-get_inode(int inum) {
+// Gets the inode from the given inum
+inode_t * get_inode(int inum) {
     inode_t *inodes = get_inode_bitmap() + 32;
     return &inodes[inum];
 }
 
-// take a look at the malloc implementation
-int
-alloc_inode() {
+// Allocaes a new inode
+int alloc_inode() {
     int nodenum;
     for (int i = 0; i < 256; ++i) {
         if (!bitmap_get(get_inode_bitmap(), i)) {
@@ -43,8 +38,7 @@ alloc_inode() {
 }
 
 // marks the inode_t as free in the bitmap and then clears the pointer locations
-void
-free_inode(int inum) {
+void free_inode(int inum) {
     inode_t *node = get_inode(inum);
     void *bmp = get_inode_bitmap();
     shrink_inode(node, 0);

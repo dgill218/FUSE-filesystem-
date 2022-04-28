@@ -49,8 +49,7 @@ nufs_getattr(const char *path, struct stat *st)
 
 // implementation for: man 2 readdir
 // lists the contents of a directory
-int
-nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
              off_t offset, struct fuse_file_info *fi)
 {
     struct stat st;
