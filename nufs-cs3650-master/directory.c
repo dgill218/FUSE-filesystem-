@@ -4,20 +4,18 @@
 #include "blocks.h"
 #include "inode.h"
 #include "directory.h"
-#include "bitmap.h"
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
 
-// Initialized a directory, allocating an inode
+// Initialize root.
 void directory_init() {
     inode_t *root = get_inode(alloc_inode());
     root->mode = 040755;
 }
 
-
-int
-directory_lookup(inode_t *dd, const char *name) {
+// Finds the inum of the given inode with the given name.
+int directory_lookup(inode_t *dd, const char *name) {
     // Root directory
     if (!strcmp(name, "")) {
         return 0;
@@ -35,25 +33,25 @@ directory_lookup(inode_t *dd, const char *name) {
     }
 }
 
-int
-tree_lookup(const char *path) {
-    int curnode = 0;
+// Finds the node at the given path
+int tree_lookup(const char *path) {
+    int current_node = 0;
 
     // parsing the path
-    slist_t *pathlist = s_explode(path, '/');
-    slist_t *currdir = pathlist;
-    while (currdir != NULL) {
-        // we look for the name of the next dir in the current one
-        curnode = directory_lookup(get_inode(curnode), currdir->data);
-        if (curnode == -1) {
-            s_free(pathlist);
+    slist_t *path_list = s_explode(path, '/');
+    slist_t *current_directory = path_list;
+
+    while (current_directory != NULL) {
+        current_node = directory_lookup(get_inode(current_node), current_directory->data);
+        if (current_node == -1) {
+            s_free(path_list);
             return -1;
         }
-        currdir = currdir->next;
+        current_directory = current_directory->next;
     }
-    s_free(pathlist);
-    printf("tree lookup: %s is at node %d\n", path, curnode);
-    return curnode;
+    s_free(path_list);
+    printf("tree lookup: %s is at node %d\n", path, current_node);
+    return current_node;
 }
 
 // puts a new directory entry into the dir at dd that points to inode_t inum
