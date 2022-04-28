@@ -24,9 +24,7 @@ storage_init(const char* path) {
             printf("second inode_t page allocated at page %d\n", newpage);
         }
     }
-    // the remaining pages will be alloced when we put data in them
 
-    // then we initialize the root directory if it isn't allocated
     if (!bitmap_get(get_blocks_bitmap(), 4)) {
         printf("initializing root directory");
         directory_init();
@@ -34,8 +32,7 @@ storage_init(const char* path) {
 }
 
 // check to see if the file is available, if not returns -ENOENT
-int
-storage_access(const char* path) {
+int storage_access(const char* path) {
 
     if (tree_lookup(path) >= 0) {
         return 0;
@@ -44,9 +41,8 @@ storage_access(const char* path) {
         return -ENOENT;
 }
 
-// mutates the stat with the inode_t features at the path
-int 
-storage_stat(const char* path, struct stat* st) {
+// Changes the stats to the file stats.
+int storage_stat(const char* path, struct stat* st) {
     int working_inum = tree_lookup(path);
     if (working_inum > 0) {
         inode_t* node = get_inode(working_inum);
@@ -58,8 +54,8 @@ storage_stat(const char* path, struct stat* st) {
     return -1;
 }
 
-int 
-storage_truncate(const char *path, off_t size) {
+// Truncates the file at the given path to the given size.
+int storage_truncate(const char *path, off_t size) {
     int inum = tree_lookup(path);
     inode_t* node = get_inode(inum);
     if (node->size < size) {
@@ -70,25 +66,28 @@ storage_truncate(const char *path, off_t size) {
     return 0;
 }
 
-int 
-storage_write(const char* path, const char* buf, size_t size, off_t offset)
+// Writes to
+int storage_write(const char* path, const char* buf, size_t size, off_t offset)
 {
-    // get the start point with the path
+
     inode_t* write_node = get_inode(tree_lookup(path));
+    // Make sure size is valid
     if (write_node->size < size + offset) {
         storage_truncate(path, size + offset);
     }
-    int bindex = 0;
-    int nindex = offset;
-    int rem = size;
-    while (rem > 0) {
-        char* dest = blocks_get_block(inode_get_pnum(write_node, nindex));
-        dest += nindex % 4096;
-        int cpyamnt = min(rem, 4096 - (nindex % 4096));
-        memcpy(dest, buf + bindex, cpyamnt);
-        bindex += cpyamnt;
-        nindex += cpyamnt;
-        rem -= cpyamnt;
+    int first_i = 0;
+    int second_i = offset;
+    int remainder = size;
+
+    while (remainder > 0) {
+        char* dest = blocks_get_block(inode_get_pnum(write_node, second_i));
+        dest += second_i % 4096;
+        int copy_amount = min(rem, 4096 - (second_i % 4096));
+
+        memcpy(dest, buf + first_i, copy_amount);
+        first_i += copy_amount;
+        second_i += copy_amount;
+        remainder -= copy_amount;
     }
     return size;    
 }
