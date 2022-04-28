@@ -15,6 +15,7 @@ typedef struct dirent {
     char used; // is this directory entry being used?
 } dirent_t;
 
+#define DIR_SIZE sizeof(dirent_t)
 
 void directory_init();
 int directory_lookup(inode_t* dd, const char* name);

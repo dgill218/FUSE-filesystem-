@@ -54,9 +54,11 @@ int tree_lookup(const char *path) {
     return current_node;
 }
 
-// puts a new directory entry into the dir at dd that points to inode_t inum
+// Makes new directory in the directory dd with the given inum
 int directory_put(inode_t *dd, const char *name, int inum) {
-    int numberEntries = dd->size / sizeof(dirent_t);
+
+    int number_entries = dd->size / DIR_SIZE;
+
     dirent_t *blockStart = blocks_get_block(dd->direct_pointers[0]);
     int beenAllocated = 0;
 
@@ -65,7 +67,7 @@ int directory_put(inode_t *dd, const char *name, int inum) {
     new.inum = inum;
     new.used = 1;
 
-    for (int i = 1; i < dd->size / sizeof(dirent_t); ++i) {
+    for (int i = 1; i < dd->size / DIR_SIZE; ++i) {
         if (blockStart[i].used == 0) {
             blockStart[i] = new;
             beenAllocated = 1;
@@ -73,8 +75,8 @@ int directory_put(inode_t *dd, const char *name, int inum) {
     }
 
     if (!beenAllocated) {
-        blockStart[numberEntries] = new;
-        dd->size = dd->size + sizeof(dirent_t);
+        blockStart[number_entries] = new;
+        dd->size = dd->size + DIR_SIZE;
     }
     return 0;
 }
@@ -82,7 +84,7 @@ int directory_put(inode_t *dd, const char *name, int inum) {
 // this sets the matching directory to unused and takes a ref off its inode_t
 int directory_delete(inode_t *dd, const char *name) {
     dirent_t *entries = blocks_get_block(dd->direct_pointers[0]);
-    for (int i = 0; i < dd->size / sizeof(dirent_t); ++i) {
+    for (int i = 0; i < dd->size / DIR_SIZE; ++i) {
         if (strcmp(entries[i].name, name) == 0) {
             entries[i].used = 0;
             return 0;
@@ -96,7 +98,7 @@ slist_t *directory_list(const char *path) {
     int current_dir = tree_lookup(path);
     inode_t *current_inode = get_inode(current_dir);
 
-    int numdirs = current_inode->size / sizeof(dirent_t);
+    int numdirs = current_inode->size / DIR_SIZE;
     dirent_t *dirs = blocks_get_block(current_inode->direct_pointers[0]);
     slist_t *dirnames = NULL;
     for (int i = 0; i < numdirs; ++i) {
@@ -109,7 +111,7 @@ slist_t *directory_list(const char *path) {
 
 // Prints the directory name.
 void print_directory(inode_t *dd) {
-    int dirCount = dd->size / sizeof(dirent_t);
+    int dirCount = dd->size / DIR_SIZE;
     dirent_t *dirs = blocks_get_block(dd->direct_pointers[0]);
     for (int i = 0; i < dirCount; ++i) {
         printf("%s\n", dirs[i].name);
