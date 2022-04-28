@@ -22,7 +22,7 @@ directory_lookup(inode_t *dd, const char *name) {
     if (!strcmp(name, "")) {
         return 0;
     } else {
-        dirent_t *subdirs = blocks_get_block(dd->direct_pointers[0]); e3
+        dirent_t *subdirs = blocks_get_block(dd->direct_pointers[0]);
         for (int i = 0; i < 64; ++i) {
             dirent_t cur = subdirs[i];
             if (strcmp(name, cur.name) == 0 && cur.used) {
