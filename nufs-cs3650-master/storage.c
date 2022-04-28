@@ -188,7 +188,7 @@ storage_link(const char *from, const char *to) {
 
 int    
 storage_rename(const char *from, const char *to) {
-    storage_link(from, to);
+    storage_link(to, from);
     storage_unlink(from);
     return 0;
 }
