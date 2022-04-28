@@ -12,10 +12,11 @@
 #include "bitmap.h"
 #include "util.h"
 
-// This is a helper method for storage_read and storage_write.
-// It does the actual reading and writing from buf
+// These are helper methods for storage_read and storage_write.
+// They do the actual reading and writing from the buffers.
 void write_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
 void read_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
+
 // initializes our file structure
 void
 storage_init(const char* path) {
@@ -37,7 +38,6 @@ storage_init(const char* path) {
 
 // check to see if the file is available, if not returns -ENOENT
 int storage_access(const char* path) {
-
     if (tree_lookup(path) >= 0) {
         return 0;
     }
@@ -62,10 +62,11 @@ int storage_stat(const char* path, struct stat* st) {
 int storage_truncate(const char *path, off_t size) {
     int inum = tree_lookup(path);
     inode_t* node = get_inode(inum);
-    if (node->size < size) {
-	grow_inode(node, size);
-    } else {
-	shrink_inode(node, size);
+    if (node->size > size) {
+        shrink_inode(node, size);
+    }
+    else {
+        grow_inode(node, size);
     }
     return 0;
 }
@@ -123,16 +124,6 @@ int storage_read(const char* path, char* buf, size_t size, off_t offset)
     int second_i = offset;
     int remainder = size;
     read_help(first_i, second_i, remainder, read_node, buf);
-    /*while (remainder > 0) {
-        char* src = blocks_get_block(inode_get_pnum(node, second_i));
-        src += second_i % 4096;
-        int copy_amount = min(remainder, 4096 - (second_i % 4096));
-
-        memcpy(buf + first_i, src, copy_amount);
-        first_i += copy_amount;
-        second_i += copy_amount;
-        remainder -= copy_amount;
-    }*/
     return size;
 }
 
