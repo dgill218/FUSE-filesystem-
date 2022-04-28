@@ -127,7 +127,7 @@ storage_mknod(const char* path, int mode) {
  
     char* item = malloc(50);
     char* parent = malloc(strlen(path));
-  //  get_parent_child(path, parent, item);
+    get_parent_child(path, parent, item);
     slist_t* flist = s_explode(path, '/');
     slist_t* fdir = flist;
     parent[0] = 0;
@@ -168,6 +168,9 @@ storage_unlink(const char* path) {
     char* parentpath = malloc(strlen(path));
     get_parent_child(path, parentpath, nodename);
 
+
+
+
     inode_t* parent = get_inode(tree_lookup(parentpath));
     int rv = directory_delete(parent, nodename);
 
@@ -186,7 +189,20 @@ storage_link(const char *from, const char *to) {
 
     char* fname = malloc(50);
     char* fparent = malloc(strlen(from));
-    get_parent_child(from, fparent, fname);
+   // get_parent_child(from, fparent, fname);
+
+    slist_t* flist = s_explode(from, '/');
+    slist_t* fdir = flist;
+    fparent[0] = 0;
+    while (fdir->next != NULL) {
+        strncat(fparent, "/", 1);
+        strncat(fparent, fdir->data, 48);
+        fdir = fdir->next;
+    }
+    memcpy(fname, fdir->data, strlen(fdir->data));
+    fname[strlen(fdir->data)] = 0;
+    s_free(flist);
+
 
     inode_t* pnode = get_inode(tree_lookup(fparent));
     directory_put(pnode, fname, tnum);
