@@ -17,6 +17,25 @@ void directory_init() {
 
 
 int
+directory_lookup(inode_t *dd, const char *name) {
+    // Root directory
+    if (!strcmp(name, "")) {
+        return 0;
+    } else {
+        dirent_t *subdirs = blocks_get_block(dd->direct_pointers[0]); e3
+        for (int i = 0; i < 64; ++i) {
+            dirent_t cur = subdirs[i];
+            if (strcmp(name, cur.name) == 0 && cur.used) {
+                // Found directory
+                return cur.inum;
+            }
+        }
+        // Noting found :(
+        return -1;
+    }
+}
+
+int
 tree_lookup(const char *path) {
     int curnode = 0;
 
