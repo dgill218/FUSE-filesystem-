@@ -81,7 +81,7 @@ int directory_put(inode_t *dd, const char *name, int inum) {
     return 0;
 }
 
-// this sets the matching directory to unused and takes a ref off its inode_t
+// Deletes the given directory
 int directory_delete(inode_t *dd, const char *name) {
     dirent_t *entries = blocks_get_block(dd->direct_pointers[0]);
     for (int i = 0; i < dd->size / DIR_SIZE; ++i) {
@@ -109,14 +109,12 @@ slist_t *directory_list(const char *path) {
     return dirnames;
 }
 
-// Prints the directory name.
+// Prints all of the directory names from the given inode.
 void print_directory(inode_t *dd) {
-    dirent_t *entries = blocks_get_block(dd->direct_pointers[0]);
-    for (int i = 0; i < dd->size / DIR_SIZE; ++i) {
-        if (strcmp(entries[i].name, name) == 0) {
-            printf("Directory name:%s", entries[i].name);
-            return 0;
-        }
+    int dirCount = dd->size / DIR_SIZE;
+    dirent_t *dirs = blocks_get_block(dd->direct_pointers[0]);
+    for (int i = 0; i < dirCount; ++i) {
+        printf("%s\n", dirs[i].name);
     }
 }
 

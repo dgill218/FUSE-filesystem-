@@ -193,15 +193,15 @@ storage_rename(const char *from, const char *to) {
     return 0;
 }
 
-int    
-storage_set_time(const char* path, const struct timespec ts[2])
+
+/*int storage_set_time(const char* path, const struct timespec ts[2])
 {
     int nodenum = tree_lookup(path);
     if (nodenum < 0) {
         return -ENOENT;
     }
     return 0;
-}
+}*/
 
 
 slist_t* storage_list(const char* path) {
