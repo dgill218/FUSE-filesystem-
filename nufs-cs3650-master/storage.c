@@ -12,8 +12,6 @@
 #include "bitmap.h"
 #include "util.h"
 
-static void get_parent_child(const char* path, char* parent, char* child);
-
 // initializes our file structure
 void
 storage_init(const char* path) {
@@ -127,7 +125,6 @@ storage_mknod(const char* path, int mode) {
  
     char* item = malloc(50);
     char* parent = malloc(strlen(path));
-  //  get_parent_child(path, parent, item);
 
     slist_t* flist = s_explode(path, '/');
     slist_t* fdir = flist;
@@ -141,7 +138,7 @@ storage_mknod(const char* path, int mode) {
     item[strlen(fdir->data)] = 0;
     s_free(flist);
 
-    int    pnodenum = tree_lookup(parent);
+    int pnodenum = tree_lookup(parent);
     if (pnodenum < 0) {
         free(item);
         free(parent);   
@@ -167,7 +164,18 @@ int
 storage_unlink(const char* path) {
     char* nodename = malloc(50);
     char* parentpath = malloc(strlen(path));
-    get_parent_child(path, parentpath, nodename);
+
+    slist_t* flist = s_explode(path, '/');
+    slist_t* fdir = flist;
+    parentpath[0] = 0;
+    while (fdir->next != NULL) {
+        strncat(parentpath, "/", 1);
+        strncat(parentpath, fdir->data, 48);
+        fdir = fdir->next;
+    }
+    memcpy(nodename, fdir->data, strlen(fdir->data));
+    nodename[strlen(fdir->data)] = 0;
+    s_free(flist);
 
 
 
@@ -235,16 +243,4 @@ slist_t* storage_list(const char* path) {
     return directory_list(path);
 }
 
-static void get_parent_child(const char* path, char* parent, char* child) {
-    slist_t* flist = s_explode(path, '/');
-    slist_t* fdir = flist;
-    parent[0] = 0;
-    while (fdir->next != NULL) {
-        strncat(parent, "/", 1);
-        strncat(parent, fdir->data, 48);
-        fdir = fdir->next;
-    }
-    memcpy(child, fdir->data, strlen(fdir->data));
-    child[strlen(fdir->data)] = 0;
-    s_free(flist);
-}
+
