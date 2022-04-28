@@ -13,7 +13,7 @@ typedef struct inode {
     int mode; // permission & type
     int size; // bytes
     int dirPtrs[num_ptrs]; // direct pointers
-    int iptr; // single indirect pointer
+    int indirect_pointer; // single indirect pointer
 } inode_t;
 
 void print_inode(inode_t* node);

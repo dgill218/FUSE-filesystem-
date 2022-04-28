@@ -13,7 +13,7 @@ print_inode(inode_t *node) {
     printf("Node Permission + Type: %d\n", node->mode);
     printf("Node size: %d\n", node->size);
     printf("Node direct pointers: %d, %d\n", node->dirPtrs[0], node->dirPtrs[1]);
-    printf("Node indirect pointer: %d\n", node->iptr);
+    printf("Node indirect pointer: %d\n", node->indirect_pointer);
 }
 
 inode_t *
@@ -60,14 +60,14 @@ int grow_inode(inode_t *node, int size) {
         if (i < num_ptrs) {
             node->dirPtrs[i] = alloc_block(); //alloc a page
         }
-        else if (node->iptr == 0) {
-            node->iptr = alloc_block();
-            int *iptrs = blocks_get_block(node->iptr); //retrieve memory loc.
-            iptrs[i - num_ptrs] = alloc_block(); //add another page
+        else if (node->indirect_pointer == 0) {
+            node->indirect_pointer = alloc_block();
+            int *indirect_pointers = blocks_get_block(node->indirect_pointer); //retrieve memory loc.
+            indirect_pointers[i - num_ptrs] = alloc_block(); //add another page
         }
         else {
-            int *iptrs = blocks_get_block(node->iptr); //retrieve memory loc.
-            iptrs[i - num_ptrs] = alloc_block(); //add another page
+            int *indirect_pointers = blocks_get_block(node->indirect_pointer); //retrieve memory loc.
+            indirect_pointers[i - num_ptrs] = alloc_block(); //add another page
         }
     }
     node->size = size;
@@ -81,12 +81,12 @@ int shrink_inode(inode_t *node, int size) {
             free_block(node->dirPtrs[i]); // free
             node->dirPtrs[i] = 0;
         } else if (i == num_ptrs) {
-            free_block(node->iptr);
-            node->iptr = 0;
+            free_block(node->indirect_pointer);
+            node->indirect_pointer = 0;
         } else { // indirect pointers
-            int *iptrs = blocks_get_block(node->iptr);
-            free_block(iptrs[i - num_ptrs]); // free
-            iptrs[i - num_ptrs] = 0;
+            int *indirect_pointers = blocks_get_block(node->indirect_pointer);
+            free_block(indirect_pointers[i - num_ptrs]); // free
+            indirect_pointers[i - num_ptrs] = 0;
         }
     }
     node->size = size;
@@ -99,8 +99,8 @@ int inode_get_pnum(inode_t *node, int fpn) {
     if (blockNum < num_ptrs) {
         return node->dirPtrs[blockNum];
     } else {
-        int *iptrs = blocks_get_block(node->iptr);
-        return iptrs[blockNum - num_ptrs];
+        int *indirect_pointers = blocks_get_block(node->indirect_pointer);
+        return indirect_pointers[blockNum - num_ptrs];
     }
 }
 
