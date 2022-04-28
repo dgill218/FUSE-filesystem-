@@ -15,9 +15,7 @@ typedef struct dirent {
     char used; // is this directory entry being used?
 } dirent_t;
 
-// not sure what this does
-void directory_init(); 
-int directory_lookup(inode_t* dd, const char* name);
+void directory_init();
 int tree_lookup(const char* path);
 int directory_put(inode_t* dd, const char* name, int inum);
 int directory_delete(inode_t* dd, const char* name);
