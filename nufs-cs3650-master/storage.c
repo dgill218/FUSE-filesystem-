@@ -108,7 +108,7 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
     int first_i = 0;
     int second_i = offset;
     int remainder = size;
-    read_write(first_i, second_i, remainder, write_node, buf);
+    write_help(first_i, second_i, remainder, write_node, buf);
     return size;    
 }
 
