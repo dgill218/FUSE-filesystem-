@@ -22,7 +22,7 @@ directory_lookup(inode_t *dd, const char *name) {
     if (!strcmp(name, "")) {
         return 0;
     } else {
-        dirent_t *subdirs = blocks_get_block(dd->dirPtrs[0]);
+        dirent_t *subdirs = blocks_get_block(dd->direct_pointers[0]);
         for (int i = 0; i < 64; ++i) {
             dirent_t cur = subdirs[i];
             if (strcmp(name, cur.name) == 0 && cur.used) {
@@ -59,7 +59,7 @@ tree_lookup(const char *path) {
 // puts a new directory entry into the dir at dd that points to inode_t inum
 int directory_put(inode_t *dd, const char *name, int inum) {
     int numberEntries = dd->size / sizeof(dirent_t);
-    dirent_t *blockStart = blocks_get_block(dd->dirPtrs[0]);
+    dirent_t *blockStart = blocks_get_block(dd->direct_pointers[0]);
     int beenAllocated = 0;
 
     dirent_t new;
@@ -83,7 +83,7 @@ int directory_put(inode_t *dd, const char *name, int inum) {
 
 // this sets the matching directory to unused and takes a ref off its inode_t
 int directory_delete(inode_t *dd, const char *name) {
-    dirent_t *entries = blocks_get_block(dd->dirPtrs[0]);
+    dirent_t *entries = blocks_get_block(dd->direct_pointers[0]);
     for (int i = 0; i < dd->size / sizeof(dirent_t); ++i) {
         if (strcmp(entries[i].name, name) == 0) {
             entries[i].used = 0;
@@ -99,7 +99,7 @@ slist_t *directory_list(const char *path) {
     inode_t *current_inode = get_inode(current_dir);
 
     int numdirs = current_inode->size / sizeof(dirent_t);
-    dirent_t *dirs = blocks_get_block(current_inode->dirPtrs[0]);
+    dirent_t *dirs = blocks_get_block(current_inode->direct_pointers[0]);
     slist_t *dirnames = NULL;
     for (int i = 0; i < numdirs; ++i) {
         if (dirs[i].used) {
@@ -112,7 +112,7 @@ slist_t *directory_list(const char *path) {
 // Prints the directory name.
 void print_directory(inode_t *dd) {
     int dirCount = dd->size / sizeof(dirent_t);
-    dirent_t *dirs = blocks_get_block(dd->dirPtrs[0]);
+    dirent_t *dirs = blocks_get_block(dd->direct_pointers[0]);
     for (int i = 0; i < dirCount; ++i) {
         printf("%s\n", dirs[i].name);
     }
