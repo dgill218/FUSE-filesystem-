@@ -11,7 +11,7 @@ print_inode(inode_t *node) {
     printf("inode_t located at %p:\n", node);
     printf("Reference count: %d\n", node->refs);
     printf("Node Permission + Type: %d\n", node->mode);
-    printf("Node size in bytes: %d\n", node->size);
+    printf("Node size: %d\n", node->size);
     printf("Node direct pointers: %d, %d\n", node->dirPtrs[0], node->dirPtrs[1]);
     printf("Node indirect pointer: %d\n", node->iptr);
 }
