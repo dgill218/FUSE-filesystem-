@@ -127,7 +127,8 @@ storage_mknod(const char* path, int mode) {
  
     char* item = malloc(50);
     char* parent = malloc(strlen(path));
-    get_parent_child(path, parent, item);
+  //  get_parent_child(path, parent, item);
+
     slist_t* flist = s_explode(path, '/');
     slist_t* fdir = flist;
     parent[0] = 0;
@@ -189,7 +190,6 @@ storage_link(const char *from, const char *to) {
 
     char* fname = malloc(50);
     char* fparent = malloc(strlen(from));
-   // get_parent_child(from, fparent, fname);
 
     slist_t* flist = s_explode(from, '/');
     slist_t* fdir = flist;
