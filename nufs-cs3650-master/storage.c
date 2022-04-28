@@ -82,7 +82,7 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
     while (remainder > 0) {
         char* dest = blocks_get_block(inode_get_pnum(write_node, second_i));
         dest += second_i % 4096;
-        int copy_amount = min(rem, 4096 - (second_i % 4096));
+        int copy_amount = min(remainder, 4096 - (second_i % 4096));
 
         memcpy(dest, buf + first_i, copy_amount);
         first_i += copy_amount;
