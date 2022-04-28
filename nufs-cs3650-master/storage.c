@@ -69,7 +69,7 @@ int storage_truncate(const char *path, off_t size) {
     return 0;
 }
 
-void read_write(int first_i, int second_i, int remainder, inode_t* node) {
+void read_write(int first_i, int second_i, int remainder, inode_t* node, const char* buf) {
     while (remainder > 0) {
         char* dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
@@ -94,7 +94,7 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
     int first_i = 0;
     int second_i = offset;
     int remainder = size;
-    read_write(first_i, second_i, remainder, write_node);
+    read_write(first_i, second_i, remainder, write_node, buf);
     /*while (remainder > 0) {
         char* dest = blocks_get_block(inode_get_pnum(write_node, second_i));
         dest += second_i % 4096;
@@ -120,8 +120,8 @@ int storage_read(const char* path, char* buf, size_t size, off_t offset)
     int remainder = size;
     while (remainder > 0) {
         char* src = blocks_get_block(inode_get_pnum(node, second_i));
-        src += nindex % 4096;
-        int cpyamnt = min(remainder, 4096 - (second_i % 4096));
+        src += second_i % 4096;
+        int copy_amount = min(remainder, 4096 - (second_i % 4096));
 
         memcpy(buf + first_i, src, copy_amount);
         first_i += copy_amount;
