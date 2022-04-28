@@ -12,7 +12,7 @@ print_inode(inode_t *node) {
     printf("Reference count: %d\n", node->refs);
     printf("Node Permission + Type: %d\n", node->mode);
     printf("Node size: %d\n", node->size);
-    printf("Node direct pointers: %d, %d\n", node->dirPtrs[0], node->dirPtrs[1]);
+    printf("Node direct pointers: %d, %d\n", node->direct_pointers[0], node->direct_pointers[1]);
     printf("Node indirect pointer: %d\n", node->indirect_pointer);
 }
 
@@ -37,7 +37,7 @@ alloc_inode() {
     new_node->refs = 1;
     new_node->size = 0;
     new_node->mode = 0;
-    new_node->dirPtrs[0] = alloc_block();
+    new_node->direct_pointers[0] = alloc_block();
 
     return nodenum;
 }
@@ -48,7 +48,7 @@ free_inode(int inum) {
     inode_t *node = get_inode(inum);
     void *bmp = get_inode_bitmap();
     shrink_inode(node, 0);
-    free_block(node->dirPtrs[0]);
+    free_block(node->direct_pointers[0]);
     bitmap_put(bmp, inum, 0);
 }
 
@@ -58,7 +58,7 @@ int grow_inode(inode_t *node, int size) {
     for (int i = (node->size / 4096) + 1; i <= size / 4096; i++) {
         // Direct ptrs
         if (i < num_ptrs) {
-            node->dirPtrs[i] = alloc_block(); //alloc a page
+            node->direct_pointers[i] = alloc_block(); //alloc a page
         }
         else if (node->indirect_pointer == 0) {
             node->indirect_pointer = alloc_block();
@@ -78,8 +78,8 @@ int grow_inode(inode_t *node, int size) {
 int shrink_inode(inode_t *node, int size) {
     for (int i = (node->size / 4096); i > size / 4096; i--) {
         if (i < num_ptrs) { // direct pointers
-            free_block(node->dirPtrs[i]); // free
-            node->dirPtrs[i] = 0;
+            free_block(node->direct_pointers[i]); // free
+            node->direct_pointers[i] = 0;
         } else if (i == num_ptrs) {
             free_block(node->indirect_pointer);
             node->indirect_pointer = 0;
@@ -97,7 +97,7 @@ int shrink_inode(inode_t *node, int size) {
 int inode_get_pnum(inode_t *node, int fpn) {
     int blockNum = fpn / 4096;
     if (blockNum < num_ptrs) {
-        return node->dirPtrs[blockNum];
+        return node->direct_pointers[blockNum];
     } else {
         int *indirect_pointers = blocks_get_block(node->indirect_pointer);
         return indirect_pointers[blockNum - num_ptrs];
