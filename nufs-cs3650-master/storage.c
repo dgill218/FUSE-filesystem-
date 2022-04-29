@@ -135,17 +135,18 @@ int storage_mknod(const char* path, int mode) {
     else {
         char *item = malloc(NAME_SIZE);
         char *parent = malloc(strlen(path));
-        slist_t *flist = s_explode(path, '/');
-        slist_t *fdir = flist;
+        slist_t *file_list = s_explode(path, '/');
+        slist_t *dir_list = file_list;
         parent[0] = 0;
-        while (fdir->next != NULL) {
+        while (dir_list->next) {
+
             strncat(parent, "/", 1);
-            strncat(parent, fdir->data, 48);
-            fdir = fdir->next;
+            strncat(parent, dir_list->data, 48);
+            dir_list = dir_list->next;
         }
-        memcpy(item, fdir->data, strlen(fdir->data));
-        item[strlen(fdir->data)] = 0;
-        s_free(flist);
+        memcpy(item, dir_list->data, strlen(dir_list->data));
+        item[strlen(dir_list->data)] = 0;
+        s_free(file_list);
 
         int node_num = tree_lookup(parent);
 
