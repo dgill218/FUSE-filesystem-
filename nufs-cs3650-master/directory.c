@@ -58,10 +58,10 @@ int directory_put(inode_t *dd, const char *name, int inum) {
     dir.inum = inum;
     dir.used = 1;
 
-    for (int i = 1; i < dd->size / DIR_SIZE; ++i) {
+    for (int i = 1; i < entry_count; ++i) {
         if (blockStart[i].used == 0) {
-            blockStart[i] = dir;
             beenAllocated = 1;
+            blockStart[i] = dir;
         }
     }
     if (!beenAllocated) {
