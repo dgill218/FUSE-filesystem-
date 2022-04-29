@@ -148,11 +148,7 @@ int storage_mknod(const char* path, int mode) {
         s_free(flist);
 
         int node_num = tree_lookup(parent);
-        if (node_num < 0) {
-            free(item);
-            free(parent);
-            return -ENOENT;
-        }
+
 
         int new_inode = alloc_inode();
         inode_t *node = get_inode(new_inode);
