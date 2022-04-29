@@ -149,7 +149,6 @@ int storage_mknod(const char* path, int mode) {
 
         int node_num = tree_lookup(parent);
 
-
         int new_inode = alloc_inode();
         inode_t *node = get_inode(new_inode);
         node->mode = mode;
@@ -158,8 +157,6 @@ int storage_mknod(const char* path, int mode) {
         inode_t *parent_dir = get_inode(node_num);
 
         directory_put(parent_dir, item, new_inode);
-        free(item);
-        free(parent);
         return 0;
     }
 }
