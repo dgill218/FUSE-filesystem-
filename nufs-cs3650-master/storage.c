@@ -19,21 +19,17 @@
 void write_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
 void read_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
 
-// initializes our file structure
-void
-storage_init(const char* path) {
-    // initialize the pages
+// initialize our basic file structure
+void storage_init(const char* path) {
     blocks_init(path);
     // allocate a page for the inode_t list
     if (!bitmap_get(get_blocks_bitmap(), 1)) {
         for (int i = 0; i < 3; i++) {
             int newpage = alloc_block();
-            printf("second inode_t page allocated at page %d\n", newpage);
         }
     }
 
     if (!bitmap_get(get_blocks_bitmap(), 4)) {
-        printf("initializing root directory");
         directory_init();
     }
 }
@@ -44,20 +40,19 @@ int storage_access(const char* path) {
         return 0;
     }
     else
-        return -ENOENT;
+        return -1;
 }
 
 // Changes the stats to the file stats.
 int storage_stat(const char* path, struct stat* st) {
     int working_inum = tree_lookup(path);
-    if (working_inum > 0) {
         inode_t* node = get_inode(working_inum);
         st->st_mode = node->mode;
         st->st_size = node->size;
         st->st_nlink = node->refs;
         return 0;
-    }
-    return -1;
+
+
 }
 
 // Truncates the file at the given path to the given size.
