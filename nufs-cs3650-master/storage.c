@@ -75,7 +75,8 @@ void write_help(int first_i, int second_i, int remainder, inode_t* node, const c
     while (remainder > 0) {
         char* dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
-        int copy_amount = min(remainder, 4096 - (second_i % 4096));
+        int copy_amount = (remainder < 4096 - (second_i % 4096)) ? remainder : 4096 - (second_i % 4096);
+        //int copy_amount = min(remainder, 4096 - (second_i % 4096));
 
         memcpy(dest, buf + first_i, copy_amount);
         first_i += copy_amount;
