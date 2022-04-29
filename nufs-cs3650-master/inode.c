@@ -94,5 +94,3 @@ int inode_get_pnum(inode_t *node, int fpn) {
         return indirect_pointers[blockNum - num_ptrs];
     }
 }
-
-

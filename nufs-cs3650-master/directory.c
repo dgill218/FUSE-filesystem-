@@ -1,5 +1,3 @@
-// Implementation of directory.h
-
 #include "slist.h"
 #include "blocks.h"
 #include "inode.h"
@@ -111,4 +109,3 @@ void print_directory(inode_t *dd) {
         printf("%s\n", dirs[i].name);
     }
 }
-

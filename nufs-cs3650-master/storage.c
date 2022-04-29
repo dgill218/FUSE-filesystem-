@@ -2,7 +2,6 @@
 
 #include <sys/stat.h>
 #include <time.h>
-#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include "slist.h"
@@ -123,7 +122,7 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
     int second_i = offset;
     int remainder = size;
     write_help(first_i, second_i, remainder, write_node, buf);
-    return size;    
+    return size;
 }
 
 
@@ -248,5 +247,3 @@ int storage_set_time(const char* path, const struct timespec ts[2])
 slist_t* storage_list(const char* path) {
     return directory_list(path);
 }
-
-
