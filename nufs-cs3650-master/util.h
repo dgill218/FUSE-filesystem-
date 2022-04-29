@@ -1,3 +1,4 @@
+/*
 // based on cs3650 starter code
 
 #ifndef UTIL_H
@@ -55,3 +56,4 @@ join_to_path(char* buf, char* item)
 
 
 #endif
+*/
