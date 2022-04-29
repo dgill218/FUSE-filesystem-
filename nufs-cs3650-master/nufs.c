@@ -66,7 +66,7 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     }
 
     slist_t* currname = dirnames;
-    while(currname != NULL) {
+    while(currname) {
         char currpath[strlen(path) + 50];
         strncpy(currpath, path, strlen(path));
         if (path[strlen(path)-1] == '/') {
