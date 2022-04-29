@@ -21,19 +21,12 @@ void read_help(int first_i, int second_i, int remainder, inode_t* node, const ch
 // initialize our basic file structure
 void storage_init(const char* path) {
     blocks_init(path);
-    // allocate a page for the inode_t list
-    /*if (!bitmap_get(get_blocks_bitmap(), 1)) {
-        for (int i = 0; i < 3; i++) {
-            int newpage = alloc_block();
-        }
-    }*/
-
     if (!bitmap_get(get_blocks_bitmap(), 4)) {
         directory_init();
     }
 }
 
-// check to see if the file is available, if not returns -ENOENT
+// check to see if the file is available, if not returns -1
 int storage_access(const char* path) {
     if (tree_lookup(path) >= 0) {
         return 0;
@@ -44,12 +37,12 @@ int storage_access(const char* path) {
 
 // Changes the stats to the file stats.
 int storage_stat(const char* path, struct stat* st) {
-    int working_inum = tree_lookup(path);
-    if (working_inum > 0) {
-        inode_t *node = get_inode(working_inum);
+    int inum = tree_lookup(path);
+    if (inum > 0) {
+        inode_t *node = get_inode(inum);
+        st->st_nlink = node->refs;
         st->st_mode = node->mode;
         st->st_size = node->size;
-        st->st_nlink = node->refs;
         return 0;
     }
     else {
@@ -74,7 +67,14 @@ void write_help(int first_i, int second_i, int remainder, inode_t* node, const c
     while (remainder > 0) {
         char* dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
-        int copy_amount = (remainder < 4096 - (second_i % 4096)) ? remainder : 4096 - (second_i % 4096);
+        int copy_amount;
+        if (remainder < 4096 - (second_i % 4096)) {
+            copy_amount = remainder;
+        }
+        else {
+            copy_amount = 4096 - (second_i % 4096);
+        }
+      //  int copy_amount = (remainder < 4096 - (second_i % 4096)) ? remainder : 4096 - (second_i % 4096);
         //int copy_amount = min(remainder, 4096 - (second_i % 4096));
 
         memcpy(dest, buf + first_i, copy_amount);
