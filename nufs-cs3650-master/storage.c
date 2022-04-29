@@ -128,20 +128,16 @@ int storage_read(const char* path, char* buf, size_t size, off_t offset)
 }
 
 
+// Add a directory at the current path
+int storage_mknod(const char* path, int mode) {
 
-int
-storage_mknod(const char* path, int mode) {
-    // should add a direntry of the correct mode to the
-    // directory at the path
-        
     // check to make sure the node doesn't alreay exist
     if (tree_lookup(path) != -1) {
-        return -EEXIST;
+        return -1;
     }
  
     char* item = malloc(50);
     char* parent = malloc(strlen(path));
-
     slist_t* flist = s_explode(path, '/');
     slist_t* fdir = flist;
     parent[0] = 0;
@@ -154,8 +150,8 @@ storage_mknod(const char* path, int mode) {
     item[strlen(fdir->data)] = 0;
     s_free(flist);
 
-    int pnodenum = tree_lookup(parent);
-    if (pnodenum < 0) {
+    int node_num = tree_lookup(parent);
+    if (node_num < 0) {
         free(item);
         free(parent);   
         return -ENOENT;
@@ -166,7 +162,7 @@ storage_mknod(const char* path, int mode) {
     node->mode = mode;
     node->size = 0;
     node->refs = 1;
-    inode_t* parent_dir = get_inode(pnodenum);
+    inode_t* parent_dir = get_inode(node_num);
 
     directory_put(parent_dir, item, new_inode);
     free(item);
@@ -174,10 +170,8 @@ storage_mknod(const char* path, int mode) {
     return 0;
 }
 
-// this is used for the removal of a link. If refs are 0, then we also
-// delete the inode_t associated with the dirent_t
-int
-storage_unlink(const char* path) {
+// Removes a link
+int storage_unlink(const char* path) {
     char* nodename = malloc(50);
     char* parentpath = malloc(strlen(path));
 
@@ -192,8 +186,6 @@ storage_unlink(const char* path) {
     memcpy(nodename, fdir->data, strlen(fdir->data));
     nodename[strlen(fdir->data)] = 0;
     s_free(flist);
-
-
 
 
     inode_t* parent = get_inode(tree_lookup(parentpath));
@@ -249,7 +241,7 @@ int storage_set_time(const char* path, const struct timespec ts[2])
 {
     int nodenum = tree_lookup(path);
     if (nodenum < 0) {
-        return -ENOENT;
+        return -1;
     }
     return 0;
 }
