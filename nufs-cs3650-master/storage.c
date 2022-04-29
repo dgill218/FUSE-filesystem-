@@ -22,11 +22,11 @@ void read_help(int first_i, int second_i, int remainder, inode_t* node, const ch
 void storage_init(const char* path) {
     blocks_init(path);
     // allocate a page for the inode_t list
-    if (!bitmap_get(get_blocks_bitmap(), 1)) {
+    /*if (!bitmap_get(get_blocks_bitmap(), 1)) {
         for (int i = 0; i < 3; i++) {
             int newpage = alloc_block();
         }
-    }
+    }*/
 
     if (!bitmap_get(get_blocks_bitmap(), 4)) {
         directory_init();
