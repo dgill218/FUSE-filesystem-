@@ -199,10 +199,6 @@ int storage_unlink(const char* path) {
 
 // Adds a link
 int storage_link(const char *from, const char *to) {
-    if (tree_lookup(to) < 0) {
-        return tree_lookup(to);
-    }
-
     slist_t* path_list = s_explode(from, '/');
     slist_t* temp = path_list;
 
