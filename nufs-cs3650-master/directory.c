@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <errno.h>
 
+
 // Initialize root.
 void directory_init() {
     inode_t *root = get_inode(alloc_inode());
@@ -47,25 +48,24 @@ int tree_lookup(const char *path) {
 // Makes new directory in the directory dd with the given inum
 int directory_put(inode_t *dd, const char *name, int inum) {
 
-    int number_entries = dd->size / DIR_SIZE;
+    int entry_count = dd->size / DIR_SIZE;
 
     dirent_t *blockStart = blocks_get_block(dd->direct_pointers[0]);
     int beenAllocated = 0;
 
-    dirent_t new;
-    strncpy(new.name, name, DIR_NAME_LENGTH);
-    new.inum = inum;
-    new.used = 1;
+    dirent_t dir;
+    strncpy(dir.name, name, DIR_NAME_LENGTH);
+    dir.inum = inum;
+    dir.used = 1;
 
     for (int i = 1; i < dd->size / DIR_SIZE; ++i) {
         if (blockStart[i].used == 0) {
-            blockStart[i] = new;
+            blockStart[i] = dir;
             beenAllocated = 1;
         }
     }
-
     if (!beenAllocated) {
-        blockStart[number_entries] = new;
+        blockStart[entry_count] = dir;
         dd->size = dd->size + DIR_SIZE;
     }
     return 0;
