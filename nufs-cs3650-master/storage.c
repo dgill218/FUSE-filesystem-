@@ -46,13 +46,14 @@ int storage_access(const char* path) {
 // Changes the stats to the file stats.
 int storage_stat(const char* path, struct stat* st) {
     int working_inum = tree_lookup(path);
+    if (working_inum > 0) {
         inode_t* node = get_inode(working_inum);
         st->st_mode = node->mode;
         st->st_size = node->size;
         st->st_nlink = node->refs;
         return 0;
 
-
+    return -1;
 }
 
 // Truncates the file at the given path to the given size.
