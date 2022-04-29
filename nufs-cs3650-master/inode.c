@@ -1,4 +1,7 @@
+// inode_t implementation
+
 #include <stdio.h>
+
 #include "inode.h"
 #include "blocks.h"
 #include "bitmap.h"
@@ -17,35 +20,36 @@ inode_t * get_inode(int inum) {
 
 // Allocaes a new inode
 int alloc_inode() {
-    int inode_num;
+    int nodenum;
     for (int i = 0; i < 256; ++i) {
         if (!bitmap_get(get_inode_bitmap(), i)) {
             bitmap_put(get_inode_bitmap(), i, 1);
-            inode_num = i;
+            nodenum = i;
             break;
         }
     }
-    inode_t *new_node = get_inode(inode_num);
+    inode_t *new_node = get_inode(nodenum);
     new_node->refs = 1;
     new_node->size = 0;
     new_node->mode = 0;
     new_node->direct_pointers[0] = alloc_block();
 
-    return inode_num;
+    return nodenum;
 }
 
 // marks the inode_t as free in the bitmap and then clears the pointer locations
 void free_inode(int inum) {
-    shrink_inode(get_inode(inum), 0);
-    free_block(get_inode(inum)->direct_pointers[0]);
-    bitmap_put(get_inode_bitmap(), inum, 0);
+    inode_t *node = get_inode(inum);
+    void *bmp = get_inode_bitmap();
+    shrink_inode(node, 0);
+    free_block(node->direct_pointers[0]);
+    bitmap_put(bmp, inum, 0);
 }
 
 // Increases the size of inode
 // If too large, allocates a new page
 int grow_inode(inode_t *node, int size) {
-    int block_partition = node->size / 4096;
-    for (int i = block_partition + 1; i <= size / 4096; i++) {
+    for (int i = (node->size / 4096) + 1; i <= size / 4096; i++) {
         // Direct ptrs
         if (i < num_ptrs) {
             node->direct_pointers[i] = alloc_block(); //alloc a page
@@ -66,8 +70,7 @@ int grow_inode(inode_t *node, int size) {
 
 // shrinks an inode_t by the given size
 int shrink_inode(inode_t *node, int size) {
-    int block_partition = node->size / 4096;
-    for (int i = block_partition; i > size / 4096; i--) {
+    for (int i = (node->size / 4096); i > size / 4096; i--) {
         if (i < num_ptrs) { // direct pointers
             free_block(node->direct_pointers[i]); // free
             node->direct_pointers[i] = 0;
