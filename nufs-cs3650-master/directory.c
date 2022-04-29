@@ -20,11 +20,10 @@ int directory_lookup(inode_t *dd, const char *name) {
     if (!strcmp(name, "")) {
         return 0;
     } else {
-        dirent_t *subdirs = blocks_get_block(dd->direct_pointers[0]);
+        dirent_t *lower_directs = blocks_get_block(dd->direct_pointers[0]);
         for (int i = 0; i < 64; ++i) {
-            dirent_t cur = subdirs[i];
+            dirent_t cur = lower_directs[i];
             if (strcmp(name, cur.name) == 0 && cur.used) {
-                // Found directory
                 return cur.inum;
             }
         }
@@ -36,7 +35,6 @@ int directory_lookup(inode_t *dd, const char *name) {
 // Finds the node at the given path
 int tree_lookup(const char *path) {
     int current_node = 0;
-
     // parsing the path
     slist_t *path_list = s_explode(path, '/');
     slist_t *current_directory = path_list;

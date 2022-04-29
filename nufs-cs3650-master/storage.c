@@ -15,11 +15,12 @@
 
 // These are helper methods for storage_read and storage_write.
 // They do the actual reading and writing from the buffers.
-void write_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
-void read_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
+void write_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf);
+
+void read_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf);
 
 // initialize our basic file structure
-void storage_init(const char* path) {
+void storage_init(const char *path) {
     blocks_init(path);
     if (!bitmap_get(get_blocks_bitmap(), 4)) {
         directory_init();
@@ -27,16 +28,15 @@ void storage_init(const char* path) {
 }
 
 // check to see if the file is available, if not returns -1
-int storage_access(const char* path) {
+int storage_access(const char *path) {
     if (tree_lookup(path) >= 0) {
         return 0;
-    }
-    else
+    } else
         return -1;
 }
 
 // Changes the stats to the file stats.
-int storage_stat(const char* path, struct stat* st) {
+int storage_stat(const char *path, struct stat *st) {
     int inum = tree_lookup(path);
     if (inum > 0) {
         inode_t *node = get_inode(inum);
@@ -44,8 +44,7 @@ int storage_stat(const char* path, struct stat* st) {
         st->st_mode = node->mode;
         st->st_size = node->size;
         return 0;
-    }
-    else {
+    } else {
         return -1;
     }
 }
@@ -53,25 +52,23 @@ int storage_stat(const char* path, struct stat* st) {
 // Truncates the file at the given path to the given size.
 int storage_truncate(const char *path, off_t size) {
     int inum = tree_lookup(path);
-    inode_t* node = get_inode(inum);
+    inode_t *node = get_inode(inum);
     if (node->size > size) {
         shrink_inode(node, size);
-    }
-    else {
+    } else {
         grow_inode(node, size);
     }
     return 0;
 }
 
-void write_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf) {
+void write_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
     while (remainder > 0) {
-        char* dest = blocks_get_block(inode_get_pnum(node, second_i));
+        char *dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
         int size;
         if (remainder < 4096 - (second_i % 4096)) {
             size = remainder;
-        }
-        else {
+        } else {
             size = 4096 - (second_i % 4096);
         }
 
@@ -82,15 +79,14 @@ void write_help(int first_i, int second_i, int remainder, inode_t* node, const c
     }
 }
 
-void read_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf) {
+void read_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
     while (remainder > 0) {
-        char* src = blocks_get_block(inode_get_pnum(node, second_i));
+        char *src = blocks_get_block(inode_get_pnum(node, second_i));
         src += second_i % 4096;
         int size;
         if (remainder < 4096 - (second_i % 4096)) {
             size = remainder;
-        }
-        else {
+        } else {
             size = 4096 - (second_i % 4096);
         }
         memcpy(buf + first_i, src, size);
@@ -101,9 +97,8 @@ void read_help(int first_i, int second_i, int remainder, inode_t* node, const ch
 }
 
 // Writes to the path from the buf
-int storage_write(const char* path, const char* buf, size_t size, off_t offset)
-{
-    inode_t* write_node = get_inode(tree_lookup(path));
+int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
+    inode_t *write_node = get_inode(tree_lookup(path));
     // Make sure size is valid
     if (write_node->size < size + offset) {
         storage_truncate(path, size + offset);
@@ -116,11 +111,9 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
 }
 
 
-
 // Reads from the file at the given path
-int storage_read(const char* path, char* buf, size_t size, off_t offset)
-{
-    inode_t* read_node = get_inode(tree_lookup(path));
+int storage_read(const char *path, char *buf, size_t size, off_t offset) {
+    inode_t *read_node = get_inode(tree_lookup(path));
     int first_i = 0;
     int second_i = offset;
     int remainder = size;
@@ -130,48 +123,44 @@ int storage_read(const char* path, char* buf, size_t size, off_t offset)
 
 
 // Add a directory at the current path
-int storage_mknod(const char* path, int mode) {
-    /*if (tree_lookup(path) != -1) {
-        return -1;
+int storage_mknod(const char *path, int mode) {
+    size_t path_len = strlen(path);
+    char *item = malloc(NAME_SIZE);
+    char *parent = malloc(path_len);
+
+    slist_t *file_list = s_explode(path, '/');
+    slist_t *dir_list = file_list;
+
+    parent[0] = 0;
+    while (dir_list->next) {
+        strncat(parent, "/", 1);
+        strncat(parent, dir_list->data, 48);
+        dir_list = dir_list->next;
     }
-    else {*/
-        size_t path_len = strlen(path);
-        char *item = malloc(NAME_SIZE);
-        char *parent = malloc(path_len);
+    size_t dir_list_len = strlen(dir_list->data);
+    memcpy(item, dir_list->data, dir_list_len);
+    item[dir_list_len] = 0;
+    s_free(file_list);
+    int node_num = tree_lookup(parent);
+    int new_inode = alloc_inode();
+    inode_t *node = get_inode(new_inode);
 
-        slist_t *file_list = s_explode(path, '/');
-        slist_t *dir_list = file_list;
-        parent[0] = 0;
-        while (dir_list->next) {
+    node->mode = mode;
+    node->size = 0;
+    node->refs = 1;
 
-            strncat(parent, "/", 1);
-            strncat(parent, dir_list->data, 48);
-            dir_list = dir_list->next;
-        }
-        size_t dir_list_len = strlen(dir_list->data);
-        memcpy(item, dir_list->data, dir_list_len);
-        item[dir_list_len] = 0;
-        s_free(file_list);
-        int node_num = tree_lookup(parent);
-        int new_inode = alloc_inode();
-        inode_t *node = get_inode(new_inode);
+    directory_put(get_inode(node_num), item, new_inode);
+    return 0;
 
-        node->mode = mode;
-        node->size = 0;
-        node->refs = 1;
-
-        directory_put(get_inode(node_num), item, new_inode);
-        return 0;
-    //}
 }
 
 // Removes a link
-int storage_unlink(const char* path) {
-    char* name = malloc(NAME_SIZE);
-    char* parent = malloc(strlen(path));
+int storage_unlink(const char *path) {
+    char *name = malloc(NAME_SIZE);
+    char *parent = malloc(strlen(path));
 
-    slist_t* path_list = s_explode(path, '/');
-    slist_t* temp = path_list;
+    slist_t *path_list = s_explode(path, '/');
+    slist_t *temp = path_list;
 
     parent[0] = 0;
     while (temp->next != NULL) {
@@ -179,12 +168,12 @@ int storage_unlink(const char* path) {
         strncat(parent, temp->data, 48);
         temp = temp->next;
     }
-    char* data = temp->data;
+    char *data = temp->data;
     memcpy(name, data, strlen(data));
     name[strlen(data)] = 0;
     s_free(path_list);
 
-    inode_t* parent_node = get_inode(tree_lookup(parent));
+    inode_t *parent_node = get_inode(tree_lookup(parent));
     int rv = directory_delete(parent_node, name);
 
     return rv;
@@ -192,11 +181,11 @@ int storage_unlink(const char* path) {
 
 // Adds a link
 int storage_link(const char *from, const char *to) {
-    slist_t* path_list = s_explode(from, '/');
-    slist_t* temp = path_list;
+    slist_t *path_list = s_explode(from, '/');
+    slist_t *temp = path_list;
 
-    char* name = malloc(NAME_SIZE);
-    char* parent = malloc(strlen(from));
+    char *name = malloc(NAME_SIZE);
+    char *parent = malloc(strlen(from));
 
     parent[0] = 0;
     while (temp->next) {
@@ -204,12 +193,12 @@ int storage_link(const char *from, const char *to) {
         strncat(parent, temp->data, 48);
         temp = temp->next;
     }
-    char* data = temp->data;
+    char *data = temp->data;
     memcpy(name, data, strlen(data));
     name[strlen(data)] = 0;
     s_free(path_list);
 
-    inode_t* parent_node = get_inode(tree_lookup(parent));
+    inode_t *parent_node = get_inode(tree_lookup(parent));
     directory_put(parent_node, name, tree_lookup(to));
     get_inode(tree_lookup(to))->refs += 1;
 
@@ -224,8 +213,7 @@ int storage_rename(const char *from, const char *to) {
 }
 
 // Sets the times?
-int storage_set_time(const char* path, const struct timespec ts[2])
-{
+int storage_set_time(const char *path, const struct timespec ts[2]) {
     int nodenum = tree_lookup(path);
     if (nodenum < 0) {
         return -1;
@@ -234,7 +222,7 @@ int storage_set_time(const char* path, const struct timespec ts[2])
 }
 
 // Lists the directories at the path
-slist_t* storage_list(const char* path) {
+slist_t *storage_list(const char *path) {
     return directory_list(path);
 }
 
