@@ -89,7 +89,8 @@ void read_help(int first_i, int second_i, int remainder, inode_t* node, const ch
     while (remainder > 0) {
         char* src = blocks_get_block(inode_get_pnum(node, second_i));
         src += second_i % 4096;
-        int copy_amount = min(remainder, 4096 - (second_i % 4096));
+       // int copy_amount = min(remainder, 4096 - (second_i % 4096));
+        int copy_amount = (remainder < 4096 - (second_i % 4096)) ? remainder : 4096 - (second_i % 4096);
 
         memcpy(buf + first_i, src, copy_amount);
         first_i += copy_amount;
