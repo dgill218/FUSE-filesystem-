@@ -190,8 +190,8 @@ int storage_unlink(const char* path) {
     name[strlen(temp->data)] = 0;
     s_free(path_list);
 
-    inode_t* parent = get_inode(tree_lookup(parent));
-    int rv = directory_delete(parent, name);
+    inode_t* pnode = get_inode(tree_lookup(parent));
+    int rv = directory_delete(pnode, name);
 
     return rv;
 }
