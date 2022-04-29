@@ -247,3 +247,4 @@ int storage_set_time(const char* path, const struct timespec ts[2])
 slist_t* storage_list(const char* path) {
     return directory_list(path);
 }
+
