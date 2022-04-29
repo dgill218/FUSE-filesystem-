@@ -90,7 +90,7 @@ slist_t *directory_list(const char *path) {
 
     int numdirs = current_inode->size / DIR_SIZE;
     dirent_t *dirs = blocks_get_block(current_inode->direct_pointers[0]);
-    slist_t *dirnames;
+    slist_t *dirnames = NULL;
     for (int i = 0; i < numdirs; ++i) {
         if (dirs[i].used) {
             dirnames = s_cons(dirs[i].name, dirnames);
