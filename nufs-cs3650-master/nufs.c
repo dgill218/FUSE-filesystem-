@@ -82,7 +82,7 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     }
 
     printf("readdir(%s) -> %d\n", path, rv);
-    s_free(dirnames);
+    s_free(directory_names);
     return 0;
 }
 
