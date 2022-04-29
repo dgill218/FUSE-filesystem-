@@ -12,6 +12,8 @@
 #include "bitmap.h"
 #include "util.h"
 
+#define NAME_SIZE 50
+
 // These are helper methods for storage_read and storage_write.
 // They do the actual reading and writing from the buffers.
 void write_help(int first_i, int second_i, int remainder, inode_t* node, const char* buf);
@@ -136,7 +138,7 @@ int storage_mknod(const char* path, int mode) {
         return -1;
     }
  
-    char* item = malloc(50);
+    char* item = malloc(NAME_SIZE);
     char* parent = malloc(strlen(path));
     slist_t* flist = s_explode(path, '/');
     slist_t* fdir = flist;
@@ -172,7 +174,7 @@ int storage_mknod(const char* path, int mode) {
 
 // Removes a link
 int storage_unlink(const char* path) {
-    char* nodename = malloc(50);
+    char* nodename = malloc(NAME_SIZE);
     char* parentpath = malloc(strlen(path));
 
     slist_t* flist = s_explode(path, '/');
@@ -197,46 +199,46 @@ int storage_unlink(const char* path) {
     return rv;
 }
 
-int    
-storage_link(const char *from, const char *to) {
+int storage_link(const char *from, const char *to) {
     int tnum = tree_lookup(to);
     if (tnum < 0) {
         return tnum;
     }
 
-    char* fname = malloc(50);
-    char* fparent = malloc(strlen(from));
+    char* name = malloc(NAME_SIZE);
+    char* parent = malloc(strlen(from));
 
-    slist_t* flist = s_explode(from, '/');
-    slist_t* fdir = flist;
-    fparent[0] = 0;
-    while (fdir->next != NULL) {
-        strncat(fparent, "/", 1);
-        strncat(fparent, fdir->data, 48);
-        fdir = fdir->next;
+    slist_t* path_list = s_explode(from, '/');
+    slist_t* temp = path_list;
+
+    parent[0] = 0;
+    while (temp->next != NULL) {
+        strncat(parent, "/", 1);
+        strncat(parent, temp->data, 48);
+        temp = temp->next;
     }
-    memcpy(fname, fdir->data, strlen(fdir->data));
-    fname[strlen(fdir->data)] = 0;
-    s_free(flist);
 
+    memcpy(name, temp->data, strlen(dir->data));
+    name[strlen(temp->data)] = 0;
+    s_free(path_list);
 
-    inode_t* pnode = get_inode(tree_lookup(fparent));
-    directory_put(pnode, fname, tnum);
+    inode_t* pnode = get_inode(tree_lookup(parent));
+    directory_put(pnode, name, tnum);
     get_inode(tnum)->refs ++;
     
-    free(fname);
-    free(fparent);
+    free(name);
+    free(parent);
     return 0;
 }
 
-int    
-storage_rename(const char *from, const char *to) {
+// Renames the file at the from path to the to path.
+int storage_rename(const char *from, const char *to) {
     storage_link(to, from);
     storage_unlink(from);
     return 0;
 }
 
-
+// Sets the times?
 int storage_set_time(const char* path, const struct timespec ts[2])
 {
     int nodenum = tree_lookup(path);
@@ -246,7 +248,7 @@ int storage_set_time(const char* path, const struct timespec ts[2])
     return 0;
 }
 
-
+// Lists the directories at the path
 slist_t* storage_list(const char* path) {
     return directory_list(path);
 }
