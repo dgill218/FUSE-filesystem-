@@ -52,7 +52,8 @@ int storage_stat(const char* path, struct stat* st) {
         st->st_size = node->size;
         st->st_nlink = node->refs;
         return 0;
-
+    }
+    else {
         return -1;
     }
 }
@@ -114,10 +115,9 @@ int storage_write(const char* path, const char* buf, size_t size, off_t offset)
 
 
 
-// Reads from the path
+// Reads from the file at the given path
 int storage_read(const char* path, char* buf, size_t size, off_t offset)
 {
-    printf("storage_read called, buffer is\n%s\n", buf);
     inode_t* read_node = get_inode(tree_lookup(path));
     int first_i = 0;
     int second_i = offset;
@@ -129,44 +129,43 @@ int storage_read(const char* path, char* buf, size_t size, off_t offset)
 
 // Add a directory at the current path
 int storage_mknod(const char* path, int mode) {
-
-    // check to make sure the node doesn't alreay exist
     if (tree_lookup(path) != -1) {
         return -1;
     }
- 
-    char* item = malloc(NAME_SIZE);
-    char* parent = malloc(strlen(path));
-    slist_t* flist = s_explode(path, '/');
-    slist_t* fdir = flist;
-    parent[0] = 0;
-    while (fdir->next != NULL) {
-        strncat(parent, "/", 1);
-        strncat(parent, fdir->data, 48);
-        fdir = fdir->next;
-    }
-    memcpy(item, fdir->data, strlen(fdir->data));
-    item[strlen(fdir->data)] = 0;
-    s_free(flist);
+    else {
+        char *item = malloc(NAME_SIZE);
+        char *parent = malloc(strlen(path));
+        slist_t *flist = s_explode(path, '/');
+        slist_t *fdir = flist;
+        parent[0] = 0;
+        while (fdir->next != NULL) {
+            strncat(parent, "/", 1);
+            strncat(parent, fdir->data, 48);
+            fdir = fdir->next;
+        }
+        memcpy(item, fdir->data, strlen(fdir->data));
+        item[strlen(fdir->data)] = 0;
+        s_free(flist);
 
-    int node_num = tree_lookup(parent);
-    if (node_num < 0) {
+        int node_num = tree_lookup(parent);
+        if (node_num < 0) {
+            free(item);
+            free(parent);
+            return -ENOENT;
+        }
+
+        int new_inode = alloc_inode();
+        inode_t *node = get_inode(new_inode);
+        node->mode = mode;
+        node->size = 0;
+        node->refs = 1;
+        inode_t *parent_dir = get_inode(node_num);
+
+        directory_put(parent_dir, item, new_inode);
         free(item);
-        free(parent);   
-        return -ENOENT;
+        free(parent);
+        return 0;
     }
-    
-    int new_inode = alloc_inode();
-    inode_t* node = get_inode(new_inode);
-    node->mode = mode;
-    node->size = 0;
-    node->refs = 1;
-    inode_t* parent_dir = get_inode(node_num);
-
-    directory_put(parent_dir, item, new_inode);
-    free(item);
-    free(parent);
-    return 0;
 }
 
 // Removes a link
