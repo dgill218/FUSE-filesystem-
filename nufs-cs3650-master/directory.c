@@ -34,15 +34,14 @@ int directory_lookup(inode_t *dd, const char *name) {
 
 // Finds the node at the given path
 int tree_lookup(const char *path) {
-    int current_node = 0;
+    int inum = 0;
     // parsing the path
     slist_t *path_list = s_explode(path, '/');
-
-    while (path_list != NULL) {
-        current_node = directory_lookup(get_inode(current_node), path_list->data);
+    while (path_list) {
+        inum = directory_lookup(get_inode(inum), path_list->data);
         path_list = path_list->next;
     }
-    return current_node;
+    return inum;
 }
 
 // Makes new directory in the directory dd with the given inum
