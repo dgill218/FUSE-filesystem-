@@ -199,9 +199,8 @@ int storage_unlink(const char* path) {
 }
 
 int storage_link(const char *from, const char *to) {
-    int tnum = tree_lookup(to);
-    if (tnum < 0) {
-        return tnum;
+    if (tree_lookup(to) < 0) {
+        return tree_lookup(to);
     }
 
     char* name = malloc(NAME_SIZE);
@@ -211,7 +210,7 @@ int storage_link(const char *from, const char *to) {
     slist_t* temp = path_list;
 
     parent[0] = 0;
-    while (temp->next != NULL) {
+    while (temp->next) {
         strncat(parent, "/", 1);
         strncat(parent, temp->data, 48);
         temp = temp->next;
@@ -222,8 +221,8 @@ int storage_link(const char *from, const char *to) {
     s_free(path_list);
 
     inode_t* pnode = get_inode(tree_lookup(parent));
-    directory_put(pnode, name, tnum);
-    get_inode(tnum)->refs ++;
+    directory_put(pnode, name, tree_lookup(to));
+    get_inode(tree_lookup(to))->refs ++;
     
     free(name);
     free(parent);
