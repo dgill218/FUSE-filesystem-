@@ -50,7 +50,7 @@ nufs_getattr(const char *path, struct stat *st)
 // implementation for: man 2 readdir
 // lists the contents of a directory
 int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-             off_t offset, struct fuse_file_info *fi)
+                 off_t offset, struct fuse_file_info *fi)
 {
     struct stat st;
     int rv;
@@ -69,12 +69,12 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     while(currname != NULL) {
         char currpath[strlen(path) + 50];
         strncpy(currpath, path, strlen(path));
-	if (path[strlen(path)-1] == '/') {
-	    currpath[strlen(path)] = 0;
-	} else {
- 	    currpath[strlen(path)] = '/';
-	    currpath[strlen(path) + 1] = 0;
-	}
+        if (path[strlen(path)-1] == '/') {
+            currpath[strlen(path)] = 0;
+        } else {
+            currpath[strlen(path)] = '/';
+            currpath[strlen(path) + 1] = 0;
+        }
         strncat(currpath, currname->data, 48);
         nufs_getattr(currpath, &st);
         filler(buf, currname->data, &st, 0);
@@ -246,4 +246,3 @@ main(int argc, char *argv[])
     nufs_init_ops(&nufs_ops);
     return fuse_main(argc, argv, &nufs_ops, NULL);
 }
-
