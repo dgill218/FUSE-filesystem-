@@ -67,18 +67,18 @@ void write_help(int first_i, int second_i, int remainder, inode_t* node, const c
     while (remainder > 0) {
         char* dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
-        int copy_amount;
+        int size;
         if (remainder < 4096 - (second_i % 4096)) {
-            copy_amount = remainder;
+            size = remainder;
         }
         else {
-            copy_amount = 4096 - (second_i % 4096);
+            size = 4096 - (second_i % 4096);
         }
 
-        memcpy(dest, buf + first_i, copy_amount);
-        first_i += copy_amount;
-        second_i += copy_amount;
-        remainder -= copy_amount;
+        memcpy(dest, buf + first_i, size);
+        first_i += size;
+        second_i += size;
+        remainder -= size;
     }
 }
 
@@ -86,17 +86,17 @@ void read_help(int first_i, int second_i, int remainder, inode_t* node, const ch
     while (remainder > 0) {
         char* src = blocks_get_block(inode_get_pnum(node, second_i));
         src += second_i % 4096;
-        int copy_amount;
+        int size;
         if (remainder < 4096 - (second_i % 4096)) {
-            copy_amount = remainder;
+            size = remainder;
         }
         else {
-            copy_amount = 4096 - (second_i % 4096);
+            size = 4096 - (second_i % 4096);
         }
-        memcpy(buf + first_i, src, copy_amount);
-        first_i += copy_amount;
-        second_i += copy_amount;
-        remainder -= copy_amount;
+        memcpy(buf + first_i, src, size);
+        first_i += size;
+        second_i += size;
+        remainder -= size;
     }
 }
 
