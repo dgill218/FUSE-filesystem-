@@ -186,7 +186,7 @@ int storage_unlink(const char* path) {
         strncat(parent, temp->data, 48);
         temp = temp->next;
     }
-    char* data = temp->data
+    char* data = temp->data;
     memcpy(name, data, strlen(data));
     name[strlen(data)] = 0;
     s_free(path_list);
