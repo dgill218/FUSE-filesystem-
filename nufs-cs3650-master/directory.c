@@ -80,7 +80,7 @@ int directory_delete(inode_t *dd, const char *name) {
             return 0;
         }
     }
-    return -ENOENT;
+    return -1;
 }
 
 // Gets a slist of directories at the given path
@@ -90,7 +90,7 @@ slist_t *directory_list(const char *path) {
 
     int numdirs = current_inode->size / DIR_SIZE;
     dirent_t *dirs = blocks_get_block(current_inode->direct_pointers[0]);
-    slist_t *dirnames = NULL;
+    slist_t *dirnames;
     for (int i = 0; i < numdirs; ++i) {
         if (dirs[i].used) {
             dirnames = s_cons(dirs[i].name, dirnames);
