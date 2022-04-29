@@ -103,7 +103,6 @@ void read_help(int first_i, int second_i, int remainder, inode_t* node, const ch
 // Writes to the path from the buf
 int storage_write(const char* path, const char* buf, size_t size, off_t offset)
 {
-
     inode_t* write_node = get_inode(tree_lookup(path));
     // Make sure size is valid
     if (write_node->size < size + offset) {
@@ -132,10 +131,10 @@ int storage_read(const char* path, char* buf, size_t size, off_t offset)
 
 // Add a directory at the current path
 int storage_mknod(const char* path, int mode) {
-    if (tree_lookup(path) != -1) {
+    /*if (tree_lookup(path) != -1) {
         return -1;
     }
-    else {
+    else {*/
         size_t path_len = strlen(path);
         char *item = malloc(NAME_SIZE);
         char *parent = malloc(path_len);
@@ -163,7 +162,7 @@ int storage_mknod(const char* path, int mode) {
 
         directory_put(get_inode(node_num), item, new_inode);
         return 0;
-    }
+    //}
 }
 
 // Removes a link
