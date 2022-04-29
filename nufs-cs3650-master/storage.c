@@ -186,8 +186,9 @@ int storage_unlink(const char* path) {
         strncat(parent, temp->data, 48);
         temp = temp->next;
     }
-    memcpy(name, temp->data, strlen(temp->data));
-    name[strlen(temp->data)] = 0;
+    char* data = temp->data
+    memcpy(name, data, strlen(data));
+    name[strlen(data)] = 0;
     s_free(path_list);
 
     inode_t* pnode = get_inode(tree_lookup(parent));
