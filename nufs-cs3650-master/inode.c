@@ -20,15 +20,15 @@ inode_t * get_inode(int inum) {
 
 // Allocaes a new inode
 int alloc_inode() {
-    int nodenum;
+    int inode_num;
     for (int i = 0; i < 256; ++i) {
         if (!bitmap_get(get_inode_bitmap(), i)) {
             bitmap_put(get_inode_bitmap(), i, 1);
-            nodenum = i;
+            inode_num = i;
             break;
         }
     }
-    inode_t *new_node = get_inode(nodenum);
+    inode_t *new_node = get_inode(inode_num);
     new_node->refs = 1;
     new_node->size = 0;
     new_node->mode = 0;
@@ -39,11 +39,9 @@ int alloc_inode() {
 
 // marks the inode_t as free in the bitmap and then clears the pointer locations
 void free_inode(int inum) {
-    inode_t *node = get_inode(inum);
-    void *bmp = get_inode_bitmap();
-    shrink_inode(node, 0);
-    free_block(node->direct_pointers[0]);
-    bitmap_put(bmp, inum, 0);
+    shrink_inode(get_inode(inum), 0);
+    free_block(get_inode(inum)->direct_pointers[0]);
+    bitmap_put(get_inode_bitmap(), inum, 0);
 }
 
 // Increases the size of inode

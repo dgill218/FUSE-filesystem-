@@ -2,7 +2,6 @@
 
 #include <sys/stat.h>
 #include <time.h>
-#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include "slist.h"
