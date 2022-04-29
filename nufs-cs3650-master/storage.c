@@ -133,8 +133,10 @@ int storage_mknod(const char* path, int mode) {
         return -1;
     }
     else {
+        size_t path_len = strlen(path);
         char *item = malloc(NAME_SIZE);
-        char *parent = malloc(strlen(path));
+        char *parent = malloc(path_len);
+
         slist_t *file_list = s_explode(path, '/');
         slist_t *dir_list = file_list;
         parent[0] = 0;
