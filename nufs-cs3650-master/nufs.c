@@ -11,14 +11,15 @@
 #include <assert.h>
 #include "storage.h"
 #include "inode.h"
+
 #define FUSE_USE_VERSION 26
+
 #include <fuse.h>
 
 // implementation for: man 2 access
 // Checks if a file exists.
 int
-nufs_access(const char *path, int mask)
-{
+nufs_access(const char *path, int mask) {
     int rv = 0;
     rv = storage_access(path);
     printf("access(%s, %04o) -> %d\n", path, mask, rv);
@@ -28,16 +29,14 @@ nufs_access(const char *path, int mask)
 // implementation for: man 2 stat
 // gets an object's attributes (type, permissions, size, etc)
 int
-nufs_getattr(const char *path, struct stat *st)
-{
+nufs_getattr(const char *path, struct stat *st) {
     int rv = 0;
     if (strcmp(path, "/") == 0) {
         st->st_mode = 040755;
         st->st_size = 0;
         st->st_uid = getuid();
         st->st_nlink = 1;
-    }
-    else {
+    } else {
         rv = storage_stat(path, st);
         st->st_uid = getuid();
     }
@@ -50,35 +49,36 @@ nufs_getattr(const char *path, struct stat *st)
 // implementation for: man 2 readdir
 // lists the contents of a directory
 int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-             off_t offset, struct fuse_file_info *fi)
-{
+                 off_t offset, struct fuse_file_info *fi) {
     struct stat st;
     int rv;
 
     rv = nufs_getattr(path, &st);
     assert(rv == 0);
 
-    slist_t* dirnames = storage_list(path);
+    slist_t *directory_names = storage_list(path);
     filler(buf, ".", &st, 0);
-    if (dirnames == NULL) {
+    if (directory_names == NULL) {
         printf("readdir(%s) -> %d\n", path, rv);
         return 0;
     }
 
-    slist_t* currname = dirnames;
-    while(currname != NULL) {
-        char currpath[strlen(path) + 50];
-        strncpy(currpath, path, strlen(path));
-	if (path[strlen(path)-1] == '/') {
-	    currpath[strlen(path)] = 0;
-	} else {
- 	    currpath[strlen(path)] = '/';
-	    currpath[strlen(path) + 1] = 0;
-	}
-        strncat(currpath, currname->data, 48);
-        nufs_getattr(currpath, &st);
-        filler(buf, currname->data, &st, 0);
-        currname = currname->next;
+    slist_t *current_name = directory_names;
+    while (current_name) {
+        char current_path[strlen(path) + 50];
+
+        strncpy(current_path, path, strlen(path));
+        if (path[strlen(path) - 1] == '/') {
+            current_path[strlen(path)] = 0;
+        } else {
+            current_path[strlen(path)] = '/';
+            current_path[strlen(path) + 1] = 0;
+        }
+        strncat(current_path, current_name->data, 48);
+        nufs_getattr(current_path, &st);
+
+        filler(buf, current_name->data, &st, 0);
+        current_name = current_name->next;
     }
 
     printf("readdir(%s) -> %d\n", path, rv);
@@ -89,8 +89,7 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 // mknod makes a filesystem object like a file or directory
 // called for: man 2 open, man 2 link
 int
-nufs_mknod(const char *path, mode_t mode, dev_t rdev)
-{
+nufs_mknod(const char *path, mode_t mode, dev_t rdev) {
     int rv = -1;
     rv = storage_mknod(path, mode);
     printf("mknod(%s, %04o) -> %d\n", path, mode, rv);
@@ -100,16 +99,14 @@ nufs_mknod(const char *path, mode_t mode, dev_t rdev)
 // most of the following callbacks implement
 // another system call; see section 2 of the manual
 int
-nufs_mkdir(const char *path, mode_t mode)
-{
+nufs_mkdir(const char *path, mode_t mode) {
     int rv = nufs_mknod(path, mode | 040000, 0);
     printf("mkdir(%s) -> %d\n", path, rv);
     return rv;
 }
 
 int
-nufs_unlink(const char *path)
-{
+nufs_unlink(const char *path) {
     int rv = -1;
     rv = storage_unlink(path);
     printf("unlink(%s) -> %d\n", path, rv);
@@ -117,8 +114,7 @@ nufs_unlink(const char *path)
 }
 
 int
-nufs_link(const char *from, const char *to)
-{
+nufs_link(const char *from, const char *to) {
     int rv = -1;
     printf("link(%s => %s) -> %d\n", from, to, rv);
     rv = storage_link(to, from);
@@ -126,8 +122,7 @@ nufs_link(const char *from, const char *to)
 }
 
 int
-nufs_rmdir(const char *path)
-{
+nufs_rmdir(const char *path) {
     int rv = -1;
     printf("rmdir(%s) -> %d\n", path, rv);
     return rv;
@@ -136,8 +131,7 @@ nufs_rmdir(const char *path)
 // implements: man 2 rename
 // called to move a file within the same filesystem
 int
-nufs_rename(const char *from, const char *to)
-{
+nufs_rename(const char *from, const char *to) {
     int rv = -1;
     rv = storage_rename(from, to);
     printf("rename(%s => %s) -> %d\n", from, to, rv);
@@ -145,16 +139,14 @@ nufs_rename(const char *from, const char *to)
 }
 
 int
-nufs_chmod(const char *path, mode_t mode)
-{
+nufs_chmod(const char *path, mode_t mode) {
     int rv = -1;
     printf("chmod(%s, %04o) -> %d\n", path, mode, rv);
     return rv;
 }
 
 int
-nufs_truncate(const char *path, off_t size)
-{
+nufs_truncate(const char *path, off_t size) {
     int rv = -1;
     rv = storage_truncate(path, size);
     printf("truncate(%s, %ld bytes) -> %d\n", path, size, rv);
@@ -165,8 +157,7 @@ nufs_truncate(const char *path, off_t size)
 // since FUSE doesn't assume you maintain state for
 // open files.
 int
-nufs_open(const char *path, struct fuse_file_info *fi)
-{
+nufs_open(const char *path, struct fuse_file_info *fi) {
     int rv = 0;
     printf("open(%s) -> %d\n", path, rv);
     return rv;
@@ -174,8 +165,7 @@ nufs_open(const char *path, struct fuse_file_info *fi)
 
 // Actually read data
 int
-nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
-{
+nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
     int rv = -1;
     rv = storage_read(path, buf, size, offset);
     printf("read(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
@@ -184,8 +174,7 @@ nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_fi
 
 // Actually write data
 int
-nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
-{
+nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
     int rv = -1;
     rv = storage_write(path, buf, size, offset);
     printf("write(%s, %ld bytes, @+%ld) -> %d\n", path, size, offset, rv);
@@ -194,8 +183,7 @@ nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct 
 
 // Update the timestamps on a file or directory.
 int
-nufs_utimens(const char* path, const struct timespec ts[2])
-{
+nufs_utimens(const char *path, const struct timespec ts[2]) {
     int rv = -1;
     rv = storage_set_time(path, ts);
     printf("utimens(%s, [%ld, %ld; %ld %ld]) -> %d\n",
@@ -205,17 +193,15 @@ nufs_utimens(const char* path, const struct timespec ts[2])
 
 // Extended operations
 int
-nufs_ioctl(const char* path, int cmd, void* arg, struct fuse_file_info* fi,
-           unsigned int flags, void* data)
-{
+nufs_ioctl(const char *path, int cmd, void *arg, struct fuse_file_info *fi,
+           unsigned int flags, void *data) {
     int rv = 0;
     printf("ioctl(%s, %d, ...) -> %d\n", path, cmd, rv);
     return rv;
 }
 
 void
-nufs_init_ops(struct fuse_operations* ops)
-{
+nufs_init_ops(struct fuse_operations *ops) {
     memset(ops, 0, sizeof(struct fuse_operations));
     ops->access = nufs_access;
     ops->getattr = nufs_getattr;
@@ -239,8 +225,7 @@ nufs_init_ops(struct fuse_operations* ops)
 struct fuse_operations nufs_ops;
 
 int
-main(int argc, char *argv[])
-{
+main(int argc, char *argv[]) {
     assert(argc > 2 && argc < 6);
     storage_init(argv[--argc]);
     nufs_init_ops(&nufs_ops);

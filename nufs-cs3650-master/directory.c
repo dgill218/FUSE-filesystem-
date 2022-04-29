@@ -16,21 +16,16 @@ void directory_init() {
 
 // Finds the inum of the given inode with the given name.
 int directory_lookup(inode_t *dd, const char *name) {
-    // Root directory
-    /*if (!strcmp(name, "")) {
-        return 0;
-    } else {*/
-        dirent_t *lower_dirs = blocks_get_block(dd->direct_pointers[0]);
-        for (int i = 0; i < 64; ++i) {
-            dirent_t cur = lower_dirs[i];
-            if (cur.used && strcmp(name, cur.name) == 0 ) {
-                // Found directory
-                return cur.inum;
-            }
+    dirent_t *lower_dirs = blocks_get_block(dd->direct_pointers[0]);
+    for (int i = 0; i < 64; ++i) {
+        dirent_t cur = lower_dirs[i];
+        if (cur.used && strcmp(name, cur.name) == 0) {
+            // Found directory
+            return cur.inum;
         }
-        // Noting found :(
-        return -1;
-   // }
+    }
+    // Noting found :(
+    return -1;
 }
 
 // Finds the node at the given path
@@ -41,16 +36,15 @@ int tree_lookup(const char *path) {
     slist_t *path_list = s_explode(path, '/');
     slist_t *current_directory = path_list;
 
-    while (current_directory != NULL) {
+    while (current_directory) {
         current_node = directory_lookup(get_inode(current_node), current_directory->data);
-        if (current_node == -1) {
+        if (current_node < 0) {
             s_free(path_list);
             return -1;
         }
         current_directory = current_directory->next;
     }
     s_free(path_list);
-    printf("tree lookup: %s is at node %d\n", path, current_node);
     return current_node;
 }
 
