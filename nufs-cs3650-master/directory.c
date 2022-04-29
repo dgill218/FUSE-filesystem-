@@ -64,7 +64,10 @@ int directory_put(inode_t *dd, const char *name, int inum) {
             beenAllocated = 1;
         }
     }
-
+    if (!beenAllocated) {
+        blockStart[entry_count] = dir;
+        dd->size = dd->size + DIR_SIZE;
+    }
     return 0;
 }
 
