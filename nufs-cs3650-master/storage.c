@@ -151,12 +151,12 @@ int storage_mknod(const char* path, int mode) {
 
         int new_inode = alloc_inode();
         inode_t *node = get_inode(new_inode);
+
         node->mode = mode;
         node->size = 0;
         node->refs = 1;
-        inode_t *parent_dir = get_inode(node_num);
 
-        directory_put(parent_dir, item, new_inode);
+        directory_put(get_inode(node_num), item, new_inode);
         return 0;
     }
 }
