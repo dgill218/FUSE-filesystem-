@@ -1,7 +1,4 @@
-// inode_t implementation
-
 #include <stdio.h>
-
 #include "inode.h"
 #include "blocks.h"
 #include "bitmap.h"
@@ -47,7 +44,8 @@ void free_inode(int inum) {
 // Increases the size of inode
 // If too large, allocates a new page
 int grow_inode(inode_t *node, int size) {
-    for (int i = (node->size / 4096) + 1; i <= size / 4096; i++) {
+    int block_partition = node->size / 4096;
+    for (int i = block_partition + 1; i <= size / 4096; i++) {
         // Direct ptrs
         if (i < num_ptrs) {
             node->direct_pointers[i] = alloc_block(); //alloc a page
@@ -68,7 +66,8 @@ int grow_inode(inode_t *node, int size) {
 
 // shrinks an inode_t by the given size
 int shrink_inode(inode_t *node, int size) {
-    for (int i = (node->size / 4096); i > size / 4096; i--) {
+    int block_partition = node->size / 4096;
+    for (int i = block_partition; i > size / 4096; i--) {
         if (i < num_ptrs) { // direct pointers
             free_block(node->direct_pointers[i]); // free
             node->direct_pointers[i] = 0;
