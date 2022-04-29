@@ -10,7 +10,6 @@
 #include "directory.h"
 #include "inode.h"
 #include "bitmap.h"
-#include "util.h"
 
 #define NAME_SIZE 50
 
