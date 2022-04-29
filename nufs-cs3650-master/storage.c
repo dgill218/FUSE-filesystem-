@@ -222,10 +222,9 @@ int storage_link(const char *from, const char *to) {
 
     inode_t* pnode = get_inode(tree_lookup(parent));
     directory_put(pnode, name, tree_lookup(to));
-    get_inode(tree_lookup(to))->refs ++;
+    get_inode(tree_lookup(to))->refs++;
     
-    free(name);
-    free(parent);
+
     return 0;
 }
 
