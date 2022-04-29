@@ -146,12 +146,11 @@ int storage_mknod(const char* path, int mode) {
             strncat(parent, dir_list->data, 48);
             dir_list = dir_list->next;
         }
-        memcpy(item, dir_list->data, strlen(dir_list->data));
-        item[strlen(dir_list->data)] = 0;
+        size_t dir_list_len = strlen(dir_list->data);
+        memcpy(item, dir_list->data, dir_list_len);
+        item[dir_list_len] = 0;
         s_free(file_list);
-
         int node_num = tree_lookup(parent);
-
         int new_inode = alloc_inode();
         inode_t *node = get_inode(new_inode);
 
