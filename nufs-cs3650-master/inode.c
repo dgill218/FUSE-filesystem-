@@ -34,7 +34,7 @@ int alloc_inode() {
     new_node->mode = 0;
     new_node->direct_pointers[0] = alloc_block();
 
-    return nodenum;
+    return inode_num;
 }
 
 // marks the inode_t as free in the bitmap and then clears the pointer locations
