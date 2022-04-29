@@ -189,7 +189,6 @@ int storage_unlink(const char* path) {
     nodename[strlen(fdir->data)] = 0;
     s_free(flist);
 
-
     inode_t* parent = get_inode(tree_lookup(parentpath));
     int rv = directory_delete(parent, nodename);
 
@@ -218,7 +217,7 @@ int storage_link(const char *from, const char *to) {
         temp = temp->next;
     }
 
-    memcpy(name, temp->data, strlen(dir->data));
+    memcpy(name, temp->data, strlen(temp->data));
     name[strlen(temp->data)] = 0;
     s_free(path_list);
 
