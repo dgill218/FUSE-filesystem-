@@ -39,13 +39,12 @@ int tree_lookup(const char *path) {
     slist_t *path_list = s_explode(path, '/');
     slist_t *current_directory = path_list;
 
-    while (current_directory != NULL) {
-        current_node = directory_lookup(get_inode(current_node), current_directory->data);
+    while (path_list != NULL) {
+        current_node = directory_lookup(get_inode(current_node), path_list->data);
         if (current_node == -1) {
-            s_free(path_list);
             return -1;
         }
-        current_directory = current_directory->next;
+        path_list = path_list->next;
     }
     s_free(path_list);
     printf("tree lookup: %s is at node %d\n", path, current_node);
