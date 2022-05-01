@@ -159,57 +159,6 @@ int storage_mknod(const char *path, int mode) {
 
 }
 
-// Removes a link
-int storage_unlink(const char *path) {
-    /*char *name = malloc(NAME_SIZE);
-    char *parent = malloc(strlen(path));
-
-    slist_t *path_list = s_explode(path, '/');
-    slist_t *temp = path_list;
-
-    parent[0] = 0;
-    while (temp->next != NULL) {
-        strncat(parent, "/", 1);
-        strncat(parent, temp->data, DIR_NAME_LENGTH);
-        temp = temp->next;
-    }
-    char *data = temp->data;
-    memcpy(name, data, strlen(data));
-    name[strlen(data)] = 0;
-    s_free(path_list);
-
-    inode_t *parent_node = get_inode(tree_lookup(parent));
-    int rv = directory_delete(parent_node, name);
-
-    return rv;*/
-}
-
-// Adds a link
-int storage_link(const char *from, const char *to) {
-    slist_t *path_list = s_explode(from, '/');
-    slist_t *temp = path_list;
-
-    char *name = malloc(NAME_SIZE);
-    char *parent = malloc(strlen(from));
-
-    parent[0] = 0;
-    while (temp->next) {
-        strncat(parent, "/", 1);
-        strncat(parent, temp->data, DIR_NAME_LENGTH);
-        temp = temp->next;
-    }
-    char *data = temp->data;
-    memcpy(name, data, strlen(data));
-    name[strlen(data)] = 0;
-    s_free(path_list);
-
-    inode_t *parent_node = get_inode(tree_lookup(parent));
-    directory_put(parent_node, name, tree_lookup(to));
-    get_inode(tree_lookup(to))->refs += 1;
-
-    return 0;
-}
-
 // Renames the file at the from path to the to path.
 int storage_rename(const char *from, const char *to) {
     storage_link(to, from);
