@@ -6,7 +6,6 @@
 #include "blocks.h"
 #include <time.h>
 
-#define num_ptrs 2
 
 typedef struct inode {
     int refs; // reference count
