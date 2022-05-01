@@ -80,7 +80,7 @@ void write_help(int first_i, int second_i, int remainder, inode_t *node, const c
 }
 
 void read_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
-    while (1) {
+    do {
         char *src = blocks_get_block(inode_get_pnum(node, second_i));
         src += second_i % 4096;
         int size;
@@ -93,10 +93,9 @@ void read_help(int first_i, int second_i, int remainder, inode_t *node, const ch
         first_i += size;
         second_i += size;
         remainder -= size;
-        if (remainder <= 0) {
-            break;
-        }
     }
+    while (remainder > 0);
+
 }
 
 // Writes to the path from the buf. Returns the size of the data written
