@@ -159,6 +159,8 @@ int storage_mknod(const char *path, int mode) {
 
 }
 
+
+
 // Renames the file at the from path to the to path.
 int storage_rename(const char *from, const char *to) {
     storage_link(to, from);
