@@ -157,10 +157,8 @@ int storage_link(const char *from, const char *to) {
     return 0;
 }
 
-// Renames the file at the from path to the to path.
+// Renames the file at the from path to the to path. Where does the name come from?
 int storage_rename(const char *from, const char *to) {
-    storage_link(to, from);
-    storage_unlink(from);
     return 0;
 }
 
