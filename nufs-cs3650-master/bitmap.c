@@ -1,5 +1,4 @@
 // Implementation of bitmap.h
-
 #include "bitmap.h"
 #include <stdio.h>
 #include <stdint.h>
