@@ -161,7 +161,7 @@ int storage_mknod(const char *path, int mode) {
 
 // Removes a link
 int storage_unlink(const char *path) {
-    char *name = malloc(NAME_SIZE);
+    /*char *name = malloc(NAME_SIZE);
     char *parent = malloc(strlen(path));
 
     slist_t *path_list = s_explode(path, '/');
@@ -181,7 +181,7 @@ int storage_unlink(const char *path) {
     inode_t *parent_node = get_inode(tree_lookup(parent));
     int rv = directory_delete(parent_node, name);
 
-    return rv;
+    return rv;*/
 }
 
 // Adds a link
