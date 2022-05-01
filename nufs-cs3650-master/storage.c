@@ -159,7 +159,15 @@ int storage_mknod(const char *path, int mode) {
 
 }
 
+// Removes a link
+int storage_unlink(const char *path) {
+    return 0;
+}
 
+// Adds a link
+int storage_link(const char *from, const char *to) {
+    return 0;
+}
 
 // Renames the file at the from path to the to path.
 int storage_rename(const char *from, const char *to) {
