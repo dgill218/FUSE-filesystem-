@@ -102,7 +102,8 @@ slist_t *directory_list(const char *path) {
 void print_directory(inode_t *dd) {
     int dirCount = dd->size / DIR_SIZE;
     dirent_t *dirs = blocks_get_block(dd->direct_pointers[0]);
-    for (int i = 0; i < dirCount; ++i) {
+    printf("%s", dirs[0].name);
+    /*for (int i = 0; i < dirCount; ++i) {
         printf("%s\n", dirs[i].name);
-    }
+    }*/
 }
