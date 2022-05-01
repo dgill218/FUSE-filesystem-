@@ -28,7 +28,6 @@ test: nufs
 
 gdb: nufs
 	mkdir -p mnt || true
-	gdb --args ./nufs -f mnt data.nufs
+	gdb --args ./nufs -s -f mnt data.nufs
 
 .PHONY: clean mount unmount gdb
-
