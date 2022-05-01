@@ -52,13 +52,13 @@ int grow_inode(inode_t *node, int size) {
     int newPages = size / 4096;
     for (int i = pages + 1; i <= newPages; i++) {
         // Direct ptrs
-        if (node->indirect_pointer == 0 ) {
+        if (i < num_ptrs) {
+            node->direct_pointers[i] = alloc_block(); //alloc a page
+        }
+        else if (node->indirect_pointer == 0 ) {
             node->indirect_pointer = alloc_block();
             int *indirect_pointers = blocks_get_block(node->indirect_pointer); //retrieve memory loc.
             indirect_pointers[i - num_ptrs] = alloc_block(); //add another page
-        }
-        else if (i < num_ptrs) {
-            node->direct_pointers[i] = alloc_block(); //alloc a page
         }
         else {
             int *indirect_pointers = blocks_get_block(node->indirect_pointer); //retrieve memory loc.
@@ -74,12 +74,13 @@ int shrink_inode(inode_t *node, int size) {
     int pages = node->size / 4096;
     int newPages = size / 4096;
     for (int i = pages; i > newPages; i--) {
-        if (i == num_ptrs) {
-            free_block(node->indirect_pointer);
-            node->indirect_pointer = 0;
-        } else if (i <  num_ptrs) {
+        if ( i <  num_ptrs) {
             free_block(node->direct_pointers[i]);
             node->direct_pointers[i] = 0;
+        } else if (i == num_ptrs) {
+            free_block(node->indirect_pointer);
+            node->indirect_pointer = 0;
+
         } else {
             int *indirect_pointers = blocks_get_block(node->indirect_pointer);
             free_block(indirect_pointers[i - num_ptrs]);
