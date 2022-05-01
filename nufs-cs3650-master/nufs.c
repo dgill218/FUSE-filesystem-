@@ -98,7 +98,6 @@ int
 nufs_mkdir(const char *path, mode_t mode)
 {
     int rv = storage_mknod(path, mode | 040000);
-    //int rv = nufs_mknod(path, mode | 040000, 0);
     printf("mkdir(%s) -> %d\n", path, rv);
     return rv;
 }
@@ -115,8 +114,8 @@ nufs_unlink(const char *path)
 int nufs_link(const char *from, const char *to)
 {
     int rv = -1;
-    printf("link(%s => %s) -> %d\n", from, to, rv);
     rv = storage_link(to, from);
+    printf("link(%s => %s) -> %d\n", from, to, rv);
     return rv;
 }
 
@@ -152,9 +151,10 @@ int nufs_truncate(const char *path, off_t size)
     return rv;
 }
 
-// this is called on open, but doesn't need to do much
+// This is called on open, but doesn't need to do much
 // since FUSE doesn't assume you maintain state for
 // open files.
+// You can just check whether the file is accessible.
 int nufs_open(const char *path, struct fuse_file_info *fi)
 {
     int rv = 0;
