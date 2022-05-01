@@ -61,7 +61,7 @@ int storage_truncate(const char *path, off_t size) {
 }
 
 void write_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
-    while (1) {
+    do {
         char *dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
         int size;
@@ -75,10 +75,8 @@ void write_help(int first_i, int second_i, int remainder, inode_t *node, const c
         first_i += size;
         second_i += size;
         remainder -= size;
-        if (remainder <= 0) {
-            break;
-        }
     }
+    while (remainder > 0);
 }
 
 void read_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
