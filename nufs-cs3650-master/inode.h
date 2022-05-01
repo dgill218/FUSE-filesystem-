@@ -12,7 +12,7 @@ typedef struct inode {
     int refs; // reference count
     int mode; // permission & type
     int size; // bytes
-    int direct_pointers[num_ptrs]; // direct pointers
+    int direct_pointers[2]; // direct pointers
     int indirect_pointer; // single indirect pointer
 } inode_t;
 

@@ -52,17 +52,17 @@ int grow_inode(inode_t *node, int size) {
     int newPages = size / 4096;
     for (int i = pages + 1; i <= newPages; i++) {
         // Direct ptrs
-        if (i < num_ptrs) {
+        if (i < 2) {
             node->direct_pointers[i] = alloc_block(); //alloc a page
         }
         else if (node->indirect_pointer == 0 ) {
             node->indirect_pointer = alloc_block();
             int *indirect_pointers = blocks_get_block(node->indirect_pointer); //retrieve memory loc.
-            indirect_pointers[i - num_ptrs] = alloc_block(); //add another page
+            indirect_pointers[i - 2] = alloc_block(); //add another page
         }
         else {
             int *indirect_pointers = blocks_get_block(node->indirect_pointer); //retrieve memory loc.
-            indirect_pointers[i - num_ptrs] = alloc_block(); //add another page
+            indirect_pointers[i - 2] = alloc_block(); //add another page
         }
     }
     node->size = size;
@@ -74,17 +74,17 @@ int shrink_inode(inode_t *node, int size) {
     int pages = node->size / 4096;
     int newPages = size / 4096;
     for (int i = pages; i > newPages; i--) {
-        if ( i <  num_ptrs) {
+        if (i < 2) {
             free_block(node->direct_pointers[i]);
             node->direct_pointers[i] = 0;
-        } else if (i == num_ptrs) {
+        } else if (i == 2) {
             free_block(node->indirect_pointer);
             node->indirect_pointer = 0;
 
         } else {
             int *indirect_pointers = blocks_get_block(node->indirect_pointer);
-            free_block(indirect_pointers[i - num_ptrs]);
-            indirect_pointers[i - num_ptrs] = 0;
+            free_block(indirect_pointers[i - 2]);
+            indirect_pointers[i - 2] = 0;
         }
     }
     node->size = size;
@@ -94,10 +94,10 @@ int shrink_inode(inode_t *node, int size) {
 // gets the page number for the given inode
 int inode_get_pnum(inode_t *node, int fpn) {
     // Direct
-    if (fpn / 4096 < num_ptrs) {
+    if (fpn / 4096 < 2) {
         return node->direct_pointers[fpn / 4096];
     } else { // Indirect
         int *indirect_pointers = blocks_get_block(node->indirect_pointer);
-        return indirect_pointers[fpn / 4096 - num_ptrs];
+        return indirect_pointers[fpn / 4096 - 2];
     }
 }
