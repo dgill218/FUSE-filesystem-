@@ -87,23 +87,20 @@ slist_t *directory_list(const char *path) {
     int current_dir = tree_lookup(path);
     inode_t *current_inode = get_inode(current_dir);
 
-    int numdirs = current_inode->size / DIR_SIZE;
+    int dir_count = current_inode->size / DIR_SIZE;
     dirent_t *dirs = blocks_get_block(current_inode->direct_pointers[0]);
-    slist_t *dirnames = NULL;
-    for (int i = 0; i < numdirs; ++i) {
+    slist_t *list = NULL;
+    for (int i = 0; i < dir_count; ++i) {
         if (dirs[i].used) {
-            dirnames = s_cons(dirs[i].name, dirnames);
+            list = s_cons(dirs[i].name, list);
         }
     }
-    return dirnames;
+    return list;
 }
 
-// Prints all of the directory names from the given inode.
+// Prints the first directory name?
 void print_directory(inode_t *dd) {
-    int dirCount = dd->size / DIR_SIZE;
     dirent_t *dirs = blocks_get_block(dd->direct_pointers[0]);
     printf("%s", dirs[0].name);
-    /*for (int i = 0; i < dirCount; ++i) {
-        printf("%s\n", dirs[i].name);
-    }*/
+
 }
