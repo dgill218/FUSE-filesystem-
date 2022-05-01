@@ -86,7 +86,7 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 // called for: man 2 open, man 2 link
 int nufs_mknod(const char *path, mode_t mode, dev_t rdev)
 {
-    int rv = -1;
+    int rv;
     rv = storage_mknod(path, mode);
     printf("mknod(%s, %04o) -> %d\n", path, mode, rv);
     return rv;
