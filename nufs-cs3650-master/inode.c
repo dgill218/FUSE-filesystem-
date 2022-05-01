@@ -13,7 +13,7 @@ void print_inode(inode_t *node) {
 }
 
 // Gets the inode from the given inum
-inode_t * get_inode(int inum) {
+inode_t* get_inode(int inum) {
     inode_t *inodes = get_inode_bitmap() + 32;
     return &inodes[inum];
 }
@@ -22,7 +22,7 @@ inode_t * get_inode(int inum) {
 int alloc_inode() {
     int nodenum;
     for (int i = 0; i < 256; ++i) {
-        if (!bitmap_get(get_inode_bitmap(), i)) {
+        if (!bitmap_get(get_inode_bitmap(), i)) { // Free
             bitmap_put(get_inode_bitmap(), i, 1);
             nodenum = i;
             break;
@@ -39,17 +39,18 @@ int alloc_inode() {
 
 // marks the inode_t as free in the bitmap and then clears the pointer locations
 void free_inode(int inum) {
-    inode_t *node = get_inode(inum);
-    void *bmp = get_inode_bitmap();
-    shrink_inode(node, 0);
-    free_block(node->direct_pointers[0]);
-    bitmap_put(bmp, inum, 0);
+    void *bitmap = get_inode_bitmap();
+    shrink_inode(get_inode(inum), 0);
+    free_block(get_inode(inum)->direct_pointers[0]);
+    bitmap_put(bitmap, inum, 0);
 }
 
 // Increases the size of inode
 // If too large, allocates a new page
 int grow_inode(inode_t *node, int size) {
-    for (int i = (node->size / 4096) + 1; i <= size / 4096; i++) {
+    int pages = node->size / 4096;
+    int newPages = size / 4096;
+    for (int i = pages + 1; i <= newPages; i++) {
         // Direct ptrs
         if (i < num_ptrs) {
             node->direct_pointers[i] = alloc_block(); //alloc a page
@@ -70,7 +71,9 @@ int grow_inode(inode_t *node, int size) {
 
 // shrinks an inode_t by the given size
 int shrink_inode(inode_t *node, int size) {
-    for (int i = (node->size / 4096); i > size / 4096; i--) {
+    int pages = node->size / 4096;
+    int newPages = size / 4096;
+    for (int i = pages; i > newPages; i--) {
         if (i < num_ptrs) { // direct pointers
             free_block(node->direct_pointers[i]); // free
             node->direct_pointers[i] = 0;
@@ -89,11 +92,11 @@ int shrink_inode(inode_t *node, int size) {
 
 // gets the page number for the given inode
 int inode_get_pnum(inode_t *node, int fpn) {
-    int blockNum = fpn / 4096;
-    if (blockNum < num_ptrs) {
-        return node->direct_pointers[blockNum];
-    } else {
+    // Direct
+    if (fpn / 4096 < num_ptrs) {
+        return node->direct_pointers[fpn / 4096];
+    } else { // Indirect
         int *indirect_pointers = blocks_get_block(node->indirect_pointer);
-        return indirect_pointers[blockNum - num_ptrs];
+        return indirect_pointers[fpn / 4096 - num_ptrs];
     }
 }
