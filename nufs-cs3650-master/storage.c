@@ -61,7 +61,7 @@ int storage_truncate(const char *path, off_t size) {
 }
 
 void write_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
-    while (remainder > 0) {
+    while (1) {
         char *dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
         int size;
@@ -75,11 +75,14 @@ void write_help(int first_i, int second_i, int remainder, inode_t *node, const c
         first_i += size;
         second_i += size;
         remainder -= size;
+        if (remainder <= 0) {
+            break;
+        }
     }
 }
 
 void read_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
-    while (remainder > 0) {
+    while (1) {
         char *src = blocks_get_block(inode_get_pnum(node, second_i));
         src += second_i % 4096;
         int size;
@@ -92,10 +95,13 @@ void read_help(int first_i, int second_i, int remainder, inode_t *node, const ch
         first_i += size;
         second_i += size;
         remainder -= size;
+        if (remainder <= 0) {
+            break;
+        }
     }
 }
 
-// Writes to the path from the buf
+// Writes to the path from the buf. Returns the size of the data written
 int storage_write(const char *path, const char *buf, size_t size, off_t offset) {
     inode_t *write_node = get_inode(tree_lookup(path));
     // Make sure size is valid
@@ -110,7 +116,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 }
 
 
-// Reads from the file at the given path
+// Reads from the file at the given path. Returns the size of the data read.
 int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     inode_t *read_node = get_inode(tree_lookup(path));
     int first_i = 0;
