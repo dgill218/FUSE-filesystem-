@@ -16,8 +16,7 @@
 
 // implementation for: man 2 access
 // Checks if a file exists.
-int
-nufs_access(const char *path, int mask)
+int nufs_access(const char *path, int mask)
 {
     int rv = 0;
     rv = storage_access(path);
@@ -27,15 +26,14 @@ nufs_access(const char *path, int mask)
 
 // implementation for: man 2 stat
 // gets an object's attributes (type, permissions, size, etc)
-int
-nufs_getattr(const char *path, struct stat *st)
+int nufs_getattr(const char *path, struct stat *st)
 {
     int rv = 0;
     if (strcmp(path, "/") == 0) {
         st->st_mode = 040755;
         st->st_size = 0;
         st->st_uid = getuid();
-        st->st_nlink = 1;
+      //  st->st_nlink = 1;
     }
     else {
         rv = storage_stat(path, st);
