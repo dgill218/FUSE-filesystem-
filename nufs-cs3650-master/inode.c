@@ -48,7 +48,7 @@ void free_inode(int inum) {
 // Increases the size of inode
 // If too large, allocates a new page
 int grow_inode(inode_t *node, int size) {
-   /* int pages = node->size / 4096;
+    int pages = node->size / 4096;
     int newPages = size / 4096;
     for (int i = pages + 1; i <= newPages; i++) {
         // Direct ptrs
@@ -66,7 +66,7 @@ int grow_inode(inode_t *node, int size) {
         }
     }
     node->size = size;
-    return 0;*/
+    return 0;
 }
 
 // shrinks an inode_t by the given size
