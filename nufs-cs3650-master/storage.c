@@ -134,15 +134,14 @@ int storage_mknod(const char *path, int mode) {
     size_t dir_list_len = strlen(dir_list->data);
     memcpy(item, dir_list->data, dir_list_len);
     item[dir_list_len] = 0;
-    int node_num = tree_lookup(parent);
+
     int new_inode = alloc_inode();
     inode_t *node = get_inode(new_inode);
-
     node->mode = mode;
     node->size = 0;
     node->refs = 1;
 
-    directory_put(get_inode(node_num), item, new_inode);
+    directory_put(get_inode(tree_lookup(parent)), item, new_inode);
     return 0;
 
 }
@@ -157,7 +156,7 @@ int storage_link(const char *from, const char *to) {
     return 0;
 }
 
-// Renames the file at the from path to the to path. Where does the name come from?
+// Renames the file at the from path to the to path
 int storage_rename(const char *from, const char *to) {
     return 0;
 }
