@@ -84,8 +84,7 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
 // mknod makes a filesystem object like a file or directory
 // called for: man 2 open, man 2 link
-int
-nufs_mknod(const char *path, mode_t mode, dev_t rdev)
+int nufs_mknod(const char *path, mode_t mode, dev_t rdev)
 {
     int rv = -1;
     rv = storage_mknod(path, mode);
@@ -98,7 +97,8 @@ nufs_mknod(const char *path, mode_t mode, dev_t rdev)
 int
 nufs_mkdir(const char *path, mode_t mode)
 {
-    int rv = nufs_mknod(path, mode | 040000, 0);
+    int rv = storage_mknod(path, mode | 040000, 0);
+    //int rv = nufs_mknod(path, mode | 040000, 0);
     printf("mkdir(%s) -> %d\n", path, rv);
     return rv;
 }
@@ -112,8 +112,7 @@ nufs_unlink(const char *path)
     return rv;
 }
 
-int
-nufs_link(const char *from, const char *to)
+int nufs_link(const char *from, const char *to)
 {
     int rv = -1;
     printf("link(%s => %s) -> %d\n", from, to, rv);
@@ -121,8 +120,7 @@ nufs_link(const char *from, const char *to)
     return rv;
 }
 
-int
-nufs_rmdir(const char *path)
+int nufs_rmdir(const char *path)
 {
     int rv = -1;
     printf("rmdir(%s) -> %d\n", path, rv);
@@ -131,8 +129,7 @@ nufs_rmdir(const char *path)
 
 // implements: man 2 rename
 // called to move a file within the same filesystem
-int
-nufs_rename(const char *from, const char *to)
+int nufs_rename(const char *from, const char *to)
 {
     int rv = -1;
     rv = storage_rename(from, to);
@@ -140,16 +137,14 @@ nufs_rename(const char *from, const char *to)
     return rv;
 }
 
-int
-nufs_chmod(const char *path, mode_t mode)
+int nufs_chmod(const char *path, mode_t mode)
 {
     int rv = -1;
     printf("chmod(%s, %04o) -> %d\n", path, mode, rv);
     return rv;
 }
 
-int
-nufs_truncate(const char *path, off_t size)
+int nufs_truncate(const char *path, off_t size)
 {
     int rv = -1;
     rv = storage_truncate(path, size);
@@ -160,8 +155,7 @@ nufs_truncate(const char *path, off_t size)
 // this is called on open, but doesn't need to do much
 // since FUSE doesn't assume you maintain state for
 // open files.
-int
-nufs_open(const char *path, struct fuse_file_info *fi)
+int nufs_open(const char *path, struct fuse_file_info *fi)
 {
     int rv = 0;
     printf("open(%s) -> %d\n", path, rv);
@@ -169,8 +163,7 @@ nufs_open(const char *path, struct fuse_file_info *fi)
 }
 
 // Actually read data
-int
-nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
+int nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     int rv = -1;
     rv = storage_read(path, buf, size, offset);
@@ -179,8 +172,7 @@ nufs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_fi
 }
 
 // Actually write data
-int
-nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
+int nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     int rv = -1;
     rv = storage_write(path, buf, size, offset);
@@ -189,8 +181,7 @@ nufs_write(const char *path, const char *buf, size_t size, off_t offset, struct 
 }
 
 // Update the timestamps on a file or directory.
-int
-nufs_utimens(const char* path, const struct timespec ts[2])
+int nufs_utimens(const char* path, const struct timespec ts[2])
 {
     int rv = -1;
     rv = storage_set_time(path, ts);
@@ -200,8 +191,7 @@ nufs_utimens(const char* path, const struct timespec ts[2])
 }
 
 // Extended operations
-int
-nufs_ioctl(const char* path, int cmd, void* arg, struct fuse_file_info* fi,
+int nufs_ioctl(const char* path, int cmd, void* arg, struct fuse_file_info* fi,
            unsigned int flags, void* data)
 {
     int rv = 0;
@@ -209,8 +199,7 @@ nufs_ioctl(const char* path, int cmd, void* arg, struct fuse_file_info* fi,
     return rv;
 }
 
-void
-nufs_init_ops(struct fuse_operations* ops)
+void nufs_init_ops(struct fuse_operations* ops)
 {
     memset(ops, 0, sizeof(struct fuse_operations));
     ops->access = nufs_access;
@@ -234,8 +223,7 @@ nufs_init_ops(struct fuse_operations* ops)
 
 struct fuse_operations nufs_ops;
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     assert(argc > 2 && argc < 6);
     storage_init(argv[--argc]);
