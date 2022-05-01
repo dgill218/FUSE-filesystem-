@@ -61,7 +61,7 @@ int storage_truncate(const char *path, off_t size) {
 }
 
 void write_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
-    do {
+    while (remainder > 0) {
         char *dest = blocks_get_block(inode_get_pnum(node, second_i));
         dest += second_i % 4096;
         int size;
@@ -76,11 +76,11 @@ void write_help(int first_i, int second_i, int remainder, inode_t *node, const c
         second_i += size;
         remainder -= size;
     }
-    while (remainder > 0);
+
 }
 
 void read_help(int first_i, int second_i, int remainder, inode_t *node, const char *buf) {
-    do {
+    while (remainder > 0) {
         char *src = blocks_get_block(inode_get_pnum(node, second_i));
         src += second_i % 4096;
         int size;
@@ -94,8 +94,6 @@ void read_help(int first_i, int second_i, int remainder, inode_t *node, const ch
         second_i += size;
         remainder -= size;
     }
-    while (remainder > 0);
-
 }
 
 // Writes to the path from the buf. Returns the size of the data written
