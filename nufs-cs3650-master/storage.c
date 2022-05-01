@@ -134,7 +134,7 @@ int storage_mknod(const char *path, int mode) {
     parent[0] = 0;
     while (dir_list->next) {
         strncat(parent, "/", 1);
-        strncat(parent, dir_list->data, 48);
+        strncat(parent, dir_list->data, DIR_NAME_LENGTH);
         dir_list = dir_list->next;
     }
     size_t dir_list_len = strlen(dir_list->data);
@@ -165,7 +165,7 @@ int storage_unlink(const char *path) {
     parent[0] = 0;
     while (temp->next != NULL) {
         strncat(parent, "/", 1);
-        strncat(parent, temp->data, 48);
+        strncat(parent, temp->data, DIR_NAME_LENGTH);
         temp = temp->next;
     }
     char *data = temp->data;
@@ -190,7 +190,7 @@ int storage_link(const char *from, const char *to) {
     parent[0] = 0;
     while (temp->next) {
         strncat(parent, "/", 1);
-        strncat(parent, temp->data, 48);
+        strncat(parent, temp->data, DIR_NAME_LENGTH);
         temp = temp->next;
     }
     char *data = temp->data;

@@ -6,7 +6,6 @@
 #include "directory.h"
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
 
 
 // Initialize root.
