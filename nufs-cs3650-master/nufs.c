@@ -29,11 +29,10 @@ int nufs_access(const char *path, int mask)
 int nufs_getattr(const char *path, struct stat *st)
 {
     int rv = 0;
-    if (strcmp(path, "/") == 0) {
+    if (strcmp(path, "/") == 0) { // Root metadata
         st->st_mode = 040755;
         st->st_size = 0;
         st->st_uid = getuid();
-      //  st->st_nlink = 1;
     }
     else {
         rv = storage_stat(path, st);
@@ -56,31 +55,30 @@ int nufs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     rv = nufs_getattr(path, &st);
     assert(rv == 0);
 
-    slist_t* dirnames = storage_list(path);
+    slist_t* dir_list = storage_list(path);
     filler(buf, ".", &st, 0);
-    if (dirnames == NULL) {
+    if (dir_list == NULL) {
         printf("readdir(%s) -> %d\n", path, rv);
         return 0;
     }
 
-    slist_t* currname = dirnames;
-    while(currname) {
-        char currpath[strlen(path) + 50];
-        strncpy(currpath, path, strlen(path));
+    slist_t* cur = dir_list;
+    while(cur) {
+        char current_path[strlen(path) + 50];
+        strncpy(current_path, path, strlen(path));
         if (path[strlen(path)-1] == '/') {
-            currpath[strlen(path)] = 0;
+            current_path[strlen(path)] = 0;
         } else {
-            currpath[strlen(path)] = '/';
-            currpath[strlen(path) + 1] = 0;
+            current_path[strlen(path)] = '/';
+            current_path[strlen(path) + 1] = 0;
         }
-        strncat(currpath, currname->data, 48);
-        nufs_getattr(currpath, &st);
-        filler(buf, currname->data, &st, 0);
-        currname = currname->next;
+        strncat(current_path, cur->data, 48);
+        nufs_getattr(current_path, &st);
+        filler(buf, cur->data, &st, 0);
+        cur = cur->next;
     }
 
     printf("readdir(%s) -> %d\n", path, rv);
-    s_free(dirnames);
     return 0;
 }
 
