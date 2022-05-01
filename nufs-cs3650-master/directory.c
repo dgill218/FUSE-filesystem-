@@ -50,7 +50,7 @@ int directory_put(inode_t *dd, const char *name, int inum) {
     int entry_count = dd->size / DIR_SIZE;
 
     dirent_t *blockStart = blocks_get_block(dd->direct_pointers[0]);
-    int beenAllocated = 0;
+    int flag = 0;
 
     dirent_t dir;
     strncpy(dir.name, name, DIR_NAME_LENGTH);
@@ -59,11 +59,11 @@ int directory_put(inode_t *dd, const char *name, int inum) {
 
     for (int i = 1; i < entry_count; ++i) {
         if (blockStart[i].used == 0) {
-            beenAllocated = 1;
+            flag = 1;
             blockStart[i] = dir;
         }
     }
-    if (!beenAllocated) {
+    if (!flag) {
         blockStart[entry_count] = dir;
         dd->size = dd->size + DIR_SIZE;
     }
