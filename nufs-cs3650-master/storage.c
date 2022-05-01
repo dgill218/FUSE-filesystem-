@@ -103,10 +103,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
     if (node->size < size + offset) {
         storage_truncate(path, size + offset);
     }
-    int first_i = 0;
-    int second_i = offset;
-    int remainder = size;
-    write_help(first_i, second_i, remainder, node, buf);
+    write_help(0, offset, size, node, buf);
     return size;
 }
 
@@ -114,10 +111,7 @@ int storage_write(const char *path, const char *buf, size_t size, off_t offset) 
 // Reads from the file at the given path. Returns the size of the data read.
 int storage_read(const char *path, char *buf, size_t size, off_t offset) {
     inode_t *node = get_inode(tree_lookup(path));
-    int first_i = 0;
-    int second_i = offset;
-    int remainder = size;
-    read_help(first_i, second_i, remainder, node, buf);
+    read_help(0, offset, size, node, buf);
     return size;
 }
 
