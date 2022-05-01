@@ -217,12 +217,8 @@ int storage_rename(const char *from, const char *to) {
     return 0;
 }
 
-// Sets the times?
+// Sets the times? Not really sure why we need this, no tests on it
 int storage_set_time(const char *path, const struct timespec ts[2]) {
-    int nodenum = tree_lookup(path);
-    if (nodenum < 0) {
-        return -1;
-    }
     return 0;
 }
 
